@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Number Counter</title>
+  <!-- Favicon: Black Filled Circle -->
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/25/25694.png" type="image/png">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/25/25694.png" type="image/png">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      font-family: sans-serif;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1em;
+      margin: 0.5em 0;
+    }
+    h1 {
+      font-size: 6vw;
+      margin: 0;
+      cursor: pointer;
+    }
+    input#number-input {
+      font-size: 6vw;
+      text-align: center;
+      width: 4ch;
+    }
+    #reset {
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2em;
+      touch-action: manipulation;
+    }
+    .double-line {
+      width: 100%;
+      border-top: 5px double #333;
+      margin: 1em 0;
+    }
+    #dots {
+      display: grid;
+      gap: 0.15em;
+      justify-content: center;
+      align-content: center;
+      margin: 2em auto;
+      max-width: 90%;
+    }
+    .dot {
+      width: 1.5em;
+      height: 1.5em;
+      background: #333;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      margin-bottom: 1em;
+    }
+    .nav button {
+      font-size: 2em;
+      background: none;
+      border: none;
+      padding: 0.5em;
+      touch-action: manipulation;
+      cursor: pointer;
+    }
+    .presets-controls {
+      display: flex;
+      gap: 1em;
+      margin-top: 1em;
+    }
+    #save-preset,
+    #delete-presets {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      cursor: pointer;
+      background: #eee;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      max-width: 90%;
+      justify-content: center;
+      margin-top: 1em;
+    }
+    .preset-btn {
+      padding: 0.5em 1em;
+      font-size: 0.5em;
+      background: #eee;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="title-row">
+    <h1 id="number">1</h1>
+    <button id="reset" aria-label="Reset">↺</button>
+  </div>
+
+  <div class="double-line"></div>
+  <div id="dots"></div>
+  <div class="double-line"></div>
+
+  <div class="nav">
+    <button id="prev" aria-label="Previous"><</button>
+    <button id="next" aria-label="Next">></button>
+  </div>
+
+  <div class="presets-controls">
+    <button id="save-preset">Save Preset</button>
+    <button id="delete-presets">Delete Presets</button>
+  </div>
+  <div class="presets" id="presets-container"></div>
+
+  <script>
+    (function() {
+      let current = 1;
+      const numEl = document.getElementById('number');
+      const dotsEl = document.getElementById('dots');
+      const prevBtn = document.getElementById('prev');
+      const nextBtn = document.getElementById('next');
+      const resetBtn = document.getElementById('reset');
+      const saveBtn = document.getElementById('save-preset');
+      const deleteBtn = document.getElementById('delete-presets');
+      const presetsContainer = document.getElementById('presets-container');
+
+      function getOptimalGrid(n) {
+        if (n === 0) return { cols: 0, rows: 0 };
+        
+        // Calculate the square root for the most square-like arrangement
+        const sqrt = Math.sqrt(n);
+        let cols = Math.ceil(sqrt);
+        let rows = Math.ceil(n / cols);
+        
+        // Try to minimize the difference between rows and cols
+        while (cols * (rows - 1) >= n && rows > 1) {
+          rows--;
+        }
+        
+        return { cols, rows };
+      }
+
+      function render() {
+        numEl.textContent = current;
+        
+        // Clear existing dots
+        dotsEl.innerHTML = '';
+        
+        if (current === 0) {
+          dotsEl.style.gridTemplateColumns = '';
+          return;
+        }
+        
+        // Calculate optimal grid
+        const { cols } = getOptimalGrid(current);
+        
+        // Set grid columns
+        dotsEl.style.gridTemplateColumns = `repeat(${cols}, 2em)`;
+        
+        // Create dots
+        for (let i = 0; i < current; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'dot';
+          dotsEl.appendChild(dot);
+        }
+      }
+
+      function change(delta) {
+        const next = current + delta;
+        if (next < 0) return;
+        current = next;
+        render();
+      }
+
+      // Number editable on click
+      numEl.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = 'number-input';
+        input.value = current;
+        numEl.replaceWith(input);
+        input.focus();
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            const val = parseInt(input.value, 10);
+            if (!isNaN(val) && val >= 0) current = val;
+            input.blur();
+          }
+        });
+        input.addEventListener('blur', () => {
+          input.replaceWith(numEl);
+          render();
+        });
+      });
+
+      // Button clicks
+      prevBtn.addEventListener('click', () => change(-1));
+      nextBtn.addEventListener('click', () => change(1));
+      resetBtn.addEventListener('click', () => { current = 0; render(); });
+
+      // Save preset
+      saveBtn.addEventListener('click', () => {
+        const btn = document.createElement('button');
+        btn.textContent = current;
+        btn.className = 'preset-btn';
+        btn.addEventListener('click', () => {
+          current = parseInt(btn.textContent, 10);
+          render();
+        });
+        presetsContainer.appendChild(btn);
+      });
+
+      // Delete presets
+      deleteBtn.addEventListener('click', () => {
+        presetsContainer.innerHTML = '';
+      });
+
+      // Keyboard arrows & reset
+      document.addEventListener('keydown', e => {
+        if (document.activeElement.tagName !== 'INPUT') {
+          if (e.key === 'ArrowLeft') change(-1);
+          if (e.key === 'ArrowRight') change(1);
+          if (e.key === 'r' || e.key === 'R') { current = 0; render(); }
+        }
+      });
+
+      // Mobile: tap left/right half
+      document.addEventListener('touchstart', e => {
+        const x = e.touches[0].clientX;
+        if (x < window.innerWidth/2) change(-1);
+        else change(1);
+      });
+
+      render();
+    })();
+  </script>
+
+</body>
+</html>

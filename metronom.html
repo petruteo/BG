@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Metronome App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    .controls {
+      margin-bottom: 10px;
+    }
+    .metronome {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
+      display: inline-block;
+      vertical-align: top;
+      width: 200px;
+      margin-right: 20px;
+    }
+    .tempo-input {
+      width: 60px;
+      text-align: center;
+      font-size: 1.2em;
+    }
+    .btn {
+      font-size: 1.2em;
+      padding: 5px 8px;
+      margin: 0 3px;
+      cursor: pointer;
+    }
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff4f4f;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+    #addMet {
+      margin-bottom: 20px;
+      clear: both;
+    }
+    .metronome .presets {
+      margin-top: 10px;
+    }
+    .metronome .presets button {
+      margin-right: 5px;
+      margin-bottom: 5px;
+      padding: 3px 6px;
+      font-size: 0.9em;
+    }
+    .pendulum-container {
+      width: 100%;
+      height: 80px;
+      position: relative;
+      overflow: visible;
+    }
+    .pendulum {
+      width: 4px;
+      height: 80px;
+      background: #008cff;
+      position: absolute;
+      bottom: 0;
+      left: calc(50% - 2px);
+      transform-origin: bottom center;
+      transform: rotate(-30deg);
+    }
+  </style>
+</head>
+<body>
+  <h1>Multi-Metronome App</h1>
+  <button id="addMet" class="btn">+ Add Metronome</button>
+  <div id="metronomes"></div>
+
+  <script>
+    let nextId = 1;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const defaultTempo = 78;
+    const presets = [
+      {label: '78 BPM', tempo: 78},
+      {label: '124 BPM', tempo: 124}
+    ];
+
+    document.getElementById('addMet').addEventListener('click', () => {
+      addMetronome(defaultTempo);
+    });
+
+    function addMetronome(startTempo) {
+      const id = nextId++;
+      const el = document.createElement('div');
+      el.className = 'metronome';
+      el.dataset.id = id;
+
+      let presetsHTML = '<div class="presets"><strong>Presets:</strong> ';
+      presets.forEach(p => {
+        presetsHTML += `<button class=\"preset-btn\" data-tempo=\"${p.tempo}\">${p.label}</button>`;
+      });
+      presetsHTML += '</div>';
+
+      el.innerHTML = `
+        <button class="remove-btn">−</button>
+        <div class="controls">
+          <button class="btn dec">−</button>
+          <input type="number" class="tempo-input" value="${startTempo}" min="1" max="300" />
+          <button class="btn inc">+</button>
+          <button class="btn play">►</button>
+          <button class="btn stop">■</button>
+        </div>
+        ${presetsHTML}
+        <div class="pendulum-container">
+          <div class="pendulum"></div>
+        </div>
+      `;
+      document.getElementById('metronomes').appendChild(el);
+
+      const tempoInput = el.querySelector('.tempo-input');
+      const inc = el.querySelector('.inc');
+      const dec = el.querySelector('.dec');
+      const playBtn = el.querySelector('.play');
+      const stopBtn = el.querySelector('.stop');
+      const remove = el.querySelector('.remove-btn');
+      const presetBtns = Array.from(el.querySelectorAll('.preset-btn'));
+      const pendulum = el.querySelector('.pendulum');
+
+      let swingInterval = null;
+      let beepInterval = null;
+      let angle = 30;
+      let direction = 1;
+
+      // Natural bamboo click: shaped noise filtered for wood-like timbre
+      function beep() {
+        const now = audioCtx.currentTime;
+        const length = 0.008;
+        const bufferSize = audioCtx.sampleRate * length;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        // white noise with exponential decay envelope baked in
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const highpass = audioCtx.createBiquadFilter();
+        highpass.type = 'highpass';
+        highpass.frequency.value = 1000;
+        const lowpass = audioCtx.createBiquadFilter();
+        lowpass.type = 'lowpass';
+        lowpass.frequency.value = 6000;
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(1, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + length);
+        noise.connect(highpass).connect(lowpass).connect(gainNode).connect(audioCtx.destination);
+        noise.start(now);
+        noise.stop(now + length);
+      }
+
+      function start() {
+        stop();
+        const bpm = parseInt(tempoInput.value);
+        if (isNaN(bpm) || bpm < 1 || bpm > 300) return;
+        const interval = 60000 / bpm;
+        // Prepare pendulum at -angle instantly
+        pendulum.style.transition = 'none';
+        pendulum.style.transform = `rotate(${-angle}deg)`;
+        void pendulum.offsetWidth;
+        // Smooth continuous swing
+        pendulum.style.transition = `transform ${interval}ms ease-in-out`;
+        pendulum.style.transform = `rotate(${angle}deg)`;
+        direction = -1;
+        swingInterval = setInterval(() => {
+          pendulum.style.transform = `rotate(${direction * angle}deg)`;
+          direction *= -1;
+        }, interval);
+        // Play click at each extreme
+        beepInterval = setInterval(beep, interval);
+      }
+
+      function stop() {
+        clearInterval(swingInterval);
+        clearInterval(beepInterval);
+        swingInterval = null;
+        beepInterval = null;
+        pendulum.style.transition = 'transform 200ms ease-out';
+        pendulum.style.transform = 'rotate(0deg)';
+      }
+
+      inc.addEventListener('click', () => { tempoInput.stepUp(); if (swingInterval) start(); });
+      dec.addEventListener('click', () => { tempoInput.stepDown(); if (swingInterval) start(); });
+      playBtn.addEventListener('click', start);
+      stopBtn.addEventListener('click', stop);
+      remove.addEventListener('click', () => { stop(); el.remove(); });
+
+      tempoInput.addEventListener('keydown', e => {
+        if (e.key === 'ArrowUp') { tempoInput.stepUp(); e.preventDefault(); }
+        else if (e.key === 'ArrowDown') { tempoInput.stepDown(); e.preventDefault(); }
+        else if (e.key === 'Enter') { start(); }
+      });
+
+      presetBtns.forEach(btn => btn.addEventListener('click', () => {
+        const t = parseInt(btn.dataset.tempo);
+        tempoInput.value = t;
+        if (swingInterval) start();
+      }));
+
+      tempoInput.focus();
+    }
+
+    // Initialize with one metronome
+    addMetronome(defaultTempo);
+  </script>
+</body>
+</html>

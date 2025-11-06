@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essential Nutrients Chemical Structures</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .slideshow-container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            padding: 40px 40px 20px 40px;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nutrient-name {
+            font-size: 2.5em;
+            color: #00b894;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .nutrient-subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .structure-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            min-height: 350px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .structure-container img {
+            max-width: 100%;
+            max-height: 380px;
+            object-fit: contain;
+        }
+
+        .molecular-formula {
+            font-size: 1.4em;
+            color: #333;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 12px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        /* Navigation buttons positioned under the image */
+        .slide-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .nav-button {
+            background: #00b894;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .nav-button:hover {
+            background: #00cec9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            color: #666;
+            font-size: 1.05em;
+            margin-top: 15px;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 40px;
+            background: #f8f9fa;
+        }
+
+        .counter {
+            font-size: 1.2em;
+            color: #00b894;
+            font-weight: bold;
+        }
+
+        .auto-play-toggle {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .auto-play-toggle:hover {
+            background: #218838;
+        }
+
+        .auto-play-toggle.paused {
+            background: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .nutrient-name {
+                font-size: 1.8em;
+            }
+            
+            .slide {
+                padding: 20px 20px 15px 20px;
+            }
+            
+            .controls {
+                padding: 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .slide-navigation {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slideshow-container">
+        <!-- ESSENTIAL AMINO ACIDS -->
+        
+        <!-- Slide 1: Leucine -->
+        <div class="slide active">
+            <h1 class="nutrient-name">Leucine</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid - Branched-Chain</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6106&t=l" alt="Leucine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₆H₁₃NO₂</div>
+            <p class="info">Critical for muscle protein synthesis, wound healing, and energy production</p>
+        </div>
+
+        <!-- Slide 2: Isoleucine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Isoleucine</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid - Branched-Chain</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6306&t=l" alt="Isoleucine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₆H₁₃NO₂</div>
+            <p class="info">Important for muscle metabolism, immune function, and hemoglobin production</p>
+        </div>
+
+        <!-- Slide 3: Valine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Valine</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid - Branched-Chain</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6287&t=l" alt="Valine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₅H₁₁NO₂</div>
+            <p class="info">Supports muscle growth, tissue repair, and energy maintenance</p>
+        </div>
+
+        <!-- Slide 4: Lysine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Lysine</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5962&t=l" alt="Lysine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₆H₁₄N₂O₂</div>
+            <p class="info">Essential for protein synthesis, calcium absorption, and immune function</p>
+        </div>
+
+        <!-- Slide 5: Methionine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Methionine</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid - Sulfur-Containing</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6137&t=l" alt="Methionine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₅H₁₁NO₂S</div>
+            <p class="info">Important for metabolism, detoxification, and tissue growth</p>
+        </div>
+
+        <!-- Slide 6: Phenylalanine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Phenylalanine</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid - Aromatic</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6140&t=l" alt="Phenylalanine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₉H₁₁NO₂</div>
+            <p class="info">Precursor to neurotransmitters like dopamine and norepinephrine</p>
+        </div>
+
+        <!-- Slide 7: Threonine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Threonine</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6288&t=l" alt="Threonine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₄H₉NO₃</div>
+            <p class="info">Important for protein balance, immune function, and fat metabolism</p>
+        </div>
+
+        <!-- Slide 8: Tryptophan -->
+        <div class="slide">
+            <h1 class="nutrient-name">Tryptophan</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid - Aromatic</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6305&t=l" alt="Tryptophan Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₁₁H₁₂N₂O₂</div>
+            <p class="info">Precursor to serotonin and melatonin, regulates mood and sleep</p>
+        </div>
+
+        <!-- Slide 9: Histidine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Histidine</h1>
+            <p class="nutrient-subtitle">Essential Amino Acid</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6274&t=l" alt="Histidine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₆H₉N₃O₂</div>
+            <p class="info">Used to produce histamine, supports immune response and digestion</p>
+        </div>
+
+        <!-- VITAMINS -->
+
+        <!-- Slide 10: Vitamin C -->
+        <div class="slide">
+            <h1 class="nutrient-name">Vitamin C (Ascorbic Acid)</h1>
+            <p class="nutrient-subtitle">Water-Soluble Vitamin - Antioxidant</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=54670067&t=l" alt="Vitamin C Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₆H₈O₆</div>
+            <p class="info">Essential for collagen synthesis, immune function, and iron absorption</p>
+        </div>
+
+        <!-- Slide 11: Vitamin D3 -->
+        <div class="slide">
+            <h1 class="nutrient-name">Vitamin D₃ (Cholecalciferol)</h1>
+            <p class="nutrient-subtitle">Fat-Soluble Vitamin - Bone Health</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5280795&t=l" alt="Vitamin D3 Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₂₇H₄₄O</div>
+            <p class="info">Critical for calcium absorption, bone health, and immune function</p>
+        </div>
+
+        <!-- Slide 12: Vitamin A -->
+        <div class="slide">
+            <h1 class="nutrient-name">Vitamin A (Retinol)</h1>
+            <p class="nutrient-subtitle">Fat-Soluble Vitamin - Vision</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=445354&t=l" alt="Vitamin A Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₂₀H₃₀O</div>
+            <p class="info">Essential for vision, immune function, and cell growth</p>
+        </div>
+
+        <!-- Slide 13: Vitamin E -->
+        <div class="slide">
+            <h1 class="nutrient-name">Vitamin E (α-Tocopherol)</h1>
+            <p class="nutrient-subtitle">Fat-Soluble Vitamin - Antioxidant</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=14985&t=l" alt="Vitamin E Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₂₉H₅₀O₂</div>
+            <p class="info">Powerful antioxidant protecting cells from oxidative damage</p>
+        </div>
+
+        <!-- Slide 14: Vitamin K1 -->
+        <div class="slide">
+            <h1 class="nutrient-name">Vitamin K₁ (Phylloquinone)</h1>
+            <p class="nutrient-subtitle">Fat-Soluble Vitamin - Blood Clotting</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5284607&t=l" alt="Vitamin K1 Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₃₁H₄₆O₂</div>
+            <p class="info">Essential for blood clotting and bone metabolism</p>
+        </div>
+
+        <!-- Slide 15: Vitamin B1 -->
+        <div class="slide">
+            <h1 class="nutrient-name">Vitamin B₁ (Thiamine)</h1>
+            <p class="nutrient-subtitle">Water-Soluble Vitamin - Energy Metabolism</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6042&t=l" alt="Thiamine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₁₂H₁₇N₄OS⁺</div>
+            <p class="info">Critical for energy metabolism and nerve function</p>
+        </div>
+
+        <!-- Slide 16: Vitamin B12 -->
+        <div class="slide">
+            <h1 class="nutrient-name">Vitamin B₁₂ (Cobalamin)</h1>
+            <p class="nutrient-subtitle">Water-Soluble Vitamin - Nervous System</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5311498&t=l" alt="Vitamin B12 Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₆₃H₈₈CoN₁₄O₁₄P</div>
+            <p class="info">Essential for DNA synthesis, red blood cell formation, and nerve function</p>
+        </div>
+
+        <!-- MINERALS -->
+
+        <!-- Slide 17: Calcium -->
+        <div class="slide">
+            <h1 class="nutrient-name">Calcium (Ca)</h1>
+            <p class="nutrient-subtitle">Essential Mineral - Bones & Teeth</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5460341&t=l" alt="Calcium Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">Ca²⁺</div>
+            <p class="info">Critical for bone health, muscle function, nerve transmission, and blood clotting</p>
+        </div>
+
+        <!-- Slide 18: Iron -->
+        <div class="slide">
+            <h1 class="nutrient-name">Iron (Fe)</h1>
+            <p class="nutrient-subtitle">Essential Mineral - Oxygen Transport</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=23925&t=l" alt="Iron Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">Fe²⁺/Fe³⁺</div>
+            <p class="info">Essential component of hemoglobin, transports oxygen throughout the body</p>
+        </div>
+
+        <!-- Slide 19: Magnesium -->
+        <div class="slide">
+            <h1 class="nutrient-name">Magnesium (Mg)</h1>
+            <p class="nutrient-subtitle">Essential Mineral - Energy & Muscles</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5462224&t=l" alt="Magnesium Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">Mg²⁺</div>
+            <p class="info">Involved in over 300 enzymatic reactions, supports muscle and nerve function</p>
+        </div>
+
+        <!-- Slide 20: Zinc -->
+        <div class="slide">
+            <h1 class="nutrient-name">Zinc (Zn)</h1>
+            <p class="nutrient-subtitle">Essential Mineral - Immune Function</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=32051&t=l" alt="Zinc Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">Zn²⁺</div>
+            <p class="info">Critical for immune function, wound healing, DNA synthesis, and cell division</p>
+        </div>
+
+        <!-- Slide 21: Potassium -->
+        <div class="slide">
+            <h1 class="nutrient-name">Potassium (K)</h1>
+            <p class="nutrient-subtitle">Essential Mineral - Electrolyte Balance</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5462222&t=l" alt="Potassium Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">K⁺</div>
+            <p class="info">Essential for fluid balance, nerve signals, and muscle contractions</p>
+        </div>
+
+        <!-- Slide 22: Sodium -->
+        <div class="slide">
+            <h1 class="nutrient-name">Sodium (Na)</h1>
+            <p class="nutrient-subtitle">Essential Mineral - Fluid Balance</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5360545&t=l" alt="Sodium Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">Na⁺</div>
+            <p class="info">Regulates fluid balance, blood pressure, and nerve/muscle function</p>
+        </div>
+
+        <!-- Slide 23: Selenium -->
+        <div class="slide">
+            <h1 class="nutrient-name">Selenium (Se)</h1>
+            <p class="nutrient-subtitle">Essential Trace Mineral - Antioxidant</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6326970&t=l" alt="Selenium Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">Se</div>
+            <p class="info">Important for antioxidant defense, thyroid function, and immune health</p>
+        </div>
+
+        <!-- Slide 24: Iodine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Iodine (I)</h1>
+            <p class="nutrient-subtitle">Essential Trace Mineral - Thyroid Function</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=807&t=l" alt="Iodine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">I⁻</div>
+            <p class="info">Essential component of thyroid hormones, regulates metabolism and development</p>
+        </div>
+
+        <!-- Slide 25: Omega-3 (EPA) -->
+        <div class="slide">
+            <h1 class="nutrient-name">EPA (Eicosapentaenoic Acid)</h1>
+            <p class="nutrient-subtitle">Omega-3 Fatty Acid - Heart Health</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=446284&t=l" alt="EPA Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₂₀H₃₀O₂</div>
+            <p class="info">Essential omega-3 fatty acid supporting heart and brain health</p>
+        </div>
+
+        <!-- Slide 26: Creatine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Creatine</h1>
+            <p class="nutrient-subtitle">Nitrogenous Organic Acid - Muscle Energy</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=586&t=l" alt="Creatine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₄H₉N₃O₂</div>
+            <p class="info">Supports muscle energy production, strength, and high-intensity exercise performance</p>
+        </div>
+
+        <!-- Slide 27: L-Carnitine -->
+        <div class="slide">
+            <h1 class="nutrient-name">L-Carnitine</h1>
+            <p class="nutrient-subtitle">Amino Acid Derivative - Fat Metabolism</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=10917&t=l" alt="L-Carnitine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₇H₁₅NO₃</div>
+            <p class="info">Transports fatty acids into mitochondria for energy production</p>
+        </div>
+
+        <!-- Slide 28: Coenzyme Q10 -->
+        <div class="slide">
+            <h1 class="nutrient-name">Coenzyme Q10 (Ubiquinone)</h1>
+            <p class="nutrient-subtitle">Benzoquinone - Cellular Energy</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5281915&t=l" alt="CoQ10 Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₅₉H₉₀O₄</div>
+            <p class="info">Essential for ATP production in mitochondria and powerful antioxidant</p>
+        </div>
+
+        <!-- Slide 29: Glutamine -->
+        <div class="slide">
+            <h1 class="nutrient-name">L-Glutamine</h1>
+            <p class="nutrient-subtitle">Conditionally Essential Amino Acid - Gut & Immune Health</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5961&t=l" alt="Glutamine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₅H₁₀N₂O₃</div>
+            <p class="info">Most abundant amino acid in body, crucial for gut health and immune function</p>
+        </div>
+
+        <!-- Slide 30: Taurine -->
+        <div class="slide">
+            <h1 class="nutrient-name">Taurine</h1>
+            <p class="nutrient-subtitle">Sulfur-Containing Amino Acid - Cardiovascular Health</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=1123&t=l" alt="Taurine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₂H₇NO₃S</div>
+            <p class="info">Supports cardiovascular function, eye health, and nervous system</p>
+        </div>
+
+        <!-- Slide 31: Choline -->
+        <div class="slide">
+            <h1 class="nutrient-name">Choline</h1>
+            <p class="nutrient-subtitle">Essential Nutrient - Brain & Liver Health</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=305&t=l" alt="Choline Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₅H₁₄NO⁺</div>
+            <p class="info">Precursor to acetylcholine, essential for brain development and liver function</p>
+        </div>
+
+        <!-- Slide 32: Beta-Alanine -->
+        <div class="slide">
+            <h1 class="nutrient-name">β-Alanine (Beta-Alanine)</h1>
+            <p class="nutrient-subtitle">Non-Essential Amino Acid - Muscle Endurance</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=239&t=l" alt="Beta-Alanine Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₃H₇NO₂</div>
+            <p class="info">Precursor to carnosine, buffers acid in muscles during high-intensity exercise</p>
+        </div>
+
+        <!-- Slide 33: Alpha-Lipoic Acid -->
+        <div class="slide">
+            <h1 class="nutrient-name">Alpha-Lipoic Acid (ALA)</h1>
+            <p class="nutrient-subtitle">Antioxidant - Glucose Metabolism</p>
+            <div class="structure-container">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=6112&t=l" alt="Alpha-Lipoic Acid Structure">
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-button" onclick="changeSlide(-1)">← Previous</button>
+                <button class="nav-button" onclick="changeSlide(1)">Next →</button>
+            </div>
+            <div class="molecular-formula">C₈H₁₄O₂S₂</div>
+            <p class="info">Universal antioxidant, supports glucose metabolism and nerve health</p>
+        </div>
+
+        <div class="controls">
+            <button class="auto-play-toggle paused" onclick="toggleAutoPlay()">▶ Play</button>
+            <div class="counter">
+                <span id="current-slide">1</span> / <span id="total-slides">33</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        let autoPlayInterval = null;
+        let isAutoPlaying = false;
+
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            
+            currentSlide = (n + totalSlides) % totalSlides;
+            
+            slides[currentSlide].classList.add('active');
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+            resetAutoPlay();
+        }
+
+        function startAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+            }
+            
+            autoPlayInterval = setInterval(() => {
+                showSlide(currentSlide + 1);
+            }, 3000);
+            
+            isAutoPlaying = true;
+            updateAutoPlayButton();
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+            isAutoPlaying = false;
+            updateAutoPlayButton();
+        }
+
+        function toggleAutoPlay() {
+            if (isAutoPlaying) {
+                stopAutoPlay();
+            } else {
+                startAutoPlay();
+            }
+        }
+
+        function resetAutoPlay() {
+            if (isAutoPlaying) {
+                stopAutoPlay();
+                startAutoPlay();
+            }
+        }
+
+        function updateAutoPlayButton() {
+            const button = document.querySelector('.auto-play-toggle');
+            if (isAutoPlaying) {
+                button.textContent = '⏸ Pause';
+                button.classList.remove('paused');
+            } else {
+                button.textContent = '▶ Play';
+                button.classList.add('paused');
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeSlide(1);
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                toggleAutoPlay();
+            }
+        });
+
+        console.log('Nutrient slideshow loaded in paused mode');
+    </script>
+</body>
+</html>

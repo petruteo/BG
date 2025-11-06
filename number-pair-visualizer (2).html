@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Pair Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .display-section {
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 100px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .boxes-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        
+        .number-box {
+            padding: 20px;
+            width: 300px;
+        }
+        
+        .bars {
+            font-family: monospace;
+            font-size: 20px;
+            color: #333;
+            letter-spacing: 2px;
+            min-height: 30px;
+            word-wrap: break-word;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+        
+        .buttons-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 5px;
+            margin-top: 30px;
+        }
+        
+        .pair-button {
+            padding: 6px 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .pair-button:hover {
+            background-color: #333;
+        }
+        
+        .grid-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .grid-container {
+            display: inline-block;
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 5px;
+        }
+        
+        .download-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .download-btn:hover {
+            background-color: #333;
+        }
+        
+        .custom-input-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .custom-input {
+            padding: 6px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 120px;
+        }
+        
+        .custom-btn {
+            padding: 6px 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .grid-options {
+            margin: 10px 0;
+        }
+        
+        .grid-toggle {
+            padding: 6px 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        
+        .grid-toggle:hover {
+            background-color: #333;
+        }
+        
+        .color-palette {
+            display: none;
+            margin: 10px 0;
+        }
+        
+        .color-btn {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ccc;
+            margin: 0 3px;
+            cursor: pointer;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .color-btn:hover {
+            border-color: #555;
+        }
+        
+        .color-btn.active {
+            border-color: #000;
+            border-width: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="display-section" id="displaySection">
+            <div class="title" id="titleDisplay">Click a button to visualize</div>
+            <div class="boxes-container">
+                <div class="number-box">
+                    <div class="bars" id="firstBars"></div>
+                </div>
+                <div class="number-box">
+                    <div class="bars" id="secondBars"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid-section" id="gridSection" style="display: none;">
+            <h2>Grid Visualization</h2>
+            <div class="grid-container">
+                <svg id="gridSvg" width="400" height="400"></svg>
+            </div>
+            <button class="download-btn" onclick="downloadSvg()">Download as SVG</button>
+            <div class="custom-input-section">
+                <input type="text" class="custom-input" id="customInput" placeholder="e.g. 5 7 or 5/7">
+                <button class="custom-btn" onclick="showCustomGrid()">Show Custom Grid</button>
+            </div>
+        </div>
+        
+        <div class="buttons-section" id="buttonsSection"></div>
+    </div>
+
+    <script>
+        const pairs = [
+            { first: 2, second: 1, title: "general inflammation" },
+            { first: 8, second: 9, title: "knees" },
+            { first: 36, second: 19, title: "total spine" },
+            { first: 10, second: 11, title: "lower back" },
+            { first: 4, second: 19, title: "upper back" },
+            { first: 20, second: 9, title: "tailbone" },
+            { first: 12, second: 7, title: "sciatic nerve" },
+            { first: 10, second: 11, title: "nerve inflammation" },
+            { first: 28, second: 19, title: "nervous system" },
+            { first: 8, second: 7, title: "discs" },
+            { first: 8, second: 7, title: "liver" },
+            { first: 10, second: 11, title: "stomach" },
+            { first: 14, second: 13, title: "pancreas" },
+            { first: 12, second: 15, title: "large intestine" },
+            { first: 16, second: 7, title: "small intestine" },
+            { first: 18, second: 9, title: "kidney" },
+            { first: 6, second: 7, title: "uterus" },
+            { first: 8, second: 7, title: "eyes" },
+            { first: 6, second: 9, title: "macula" },
+            { first: 12, second: 7, title: "pituitary" },
+            { first: 16, second: 19, title: "pineal" },
+            { first: 16, second: 9, title: "brain general" },
+            { first: 10, second: 9, title: "bone marrow" },
+            { first: 12, second: 9, title: "top of head" },
+            { first: 6, second: 5, title: "prostate" },
+            { first: 16, second: 25, title: "prostate" },
+            { first: 8, second: 9, title: "back of neck/skull" },
+            { first: 8, second: 5, title: "shoulder" },
+            { first: 8, second: 7, title: "shoulder" },
+            { first: 14, second: 17, title: "migraine" },
+            { first: 10, second: 11, title: "female fertility" },
+            { first: 16, second: 13, title: "male therapy" },
+            { first: 18, second: 11, title: "lungs" },
+            { first: 10, second: 11, title: "heart" },
+            { first: 12, second: 9, title: "ears" },
+            { first: 16, second: 13, title: "throat" },
+            { first: 10, second: 13, title: "throat" },
+            { first: 16, second: 17, title: "thyroid" },
+            { first: 28, second: 27, title: "arthritis" },
+            { first: 10, second: 11, title: "life force" },
+            { first: 16, second: 9, title: "muscles" },
+            { first: 28, second: 5, title: "ligaments" },
+            { first: 32, second: 21, title: "gridlines" },
+            { first: 12, second: 9, title: "EMF" },
+            { first: 28, second: 15, title: "vitiligo" },
+            { first: 28, second: 17, title: "skin" },
+            { first: 16, second: 7, title: "hair" },
+            { first: 42, second: 17, title: "Parkinson" },
+            { first: 28, second: 19, title: "cancer" },
+            { first: 10, second: 19, title: "cysts" },
+            { first: 16, second: 7, title: "abscess" },
+            { first: 12, second: 9, title: "hemorrhoids" },
+            { first: 10, second: 9, title: "gums" },
+            { first: 12, second: 9, title: "teeth" },
+            { first: 26, second: 17, title: "water retention" },
+            { first: 32, second: 15, title: "relaxation" },
+            { first: 8, second: 7, title: "cv-imagination" },
+            { first: 16, second: 7, title: "allergy" },
+            { first: 28, second: 15, title: "neck Veins, blood pressure" }
+        ];
+
+        function displayButtons() {
+            const buttonsSection = document.getElementById('buttonsSection');
+            buttonsSection.innerHTML = '';
+            
+            pairs.forEach((pair, index) => {
+                const button = document.createElement('button');
+                button.className = 'pair-button';
+                button.textContent = `${pair.first}/${pair.second} - ${pair.title}`;
+                button.onclick = () => showPair(pair);
+                buttonsSection.appendChild(button);
+            });
+        }
+
+        function showPair(pair) {
+            const titleDisplay = document.getElementById('titleDisplay');
+            const firstBars = document.getElementById('firstBars');
+            const secondBars = document.getElementById('secondBars');
+            const gridSection = document.getElementById('gridSection');
+            
+            // Format title with numbers
+            const formattedTitle = pair.title.charAt(0).toUpperCase() + pair.title.slice(1);
+            titleDisplay.textContent = `${formattedTitle} (${pair.first}/${pair.second})`;
+            
+            // Create bars
+            firstBars.textContent = '|'.repeat(pair.first);
+            secondBars.textContent = '|'.repeat(pair.second);
+            
+            // Create grid
+            createGrid(pair.first, pair.second);
+            gridSection.style.display = 'block';
+        }
+        
+        function createGrid(rows, cols) {
+            const svg = document.getElementById('gridSvg');
+            const margin = 20;
+            
+            // Calculate cell size to ensure squares
+            const maxDimension = Math.max(rows, cols);
+            const availableSize = 360; // 400 - 2*margin
+            const cellSize = availableSize / maxDimension;
+            
+            // Calculate actual grid dimensions
+            const gridWidth = cellSize * cols;
+            const gridHeight = cellSize * rows;
+            
+            // Update SVG size to fit the grid
+            const svgWidth = gridWidth + 2 * margin;
+            const svgHeight = gridHeight + 2 * margin;
+            svg.setAttribute('width', svgWidth);
+            svg.setAttribute('height', svgHeight);
+            
+            // Clear existing content
+            svg.innerHTML = '';
+            
+            // Add title to SVG
+            const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            title.setAttribute('x', svgWidth / 2);
+            title.setAttribute('y', 15);
+            title.setAttribute('text-anchor', 'middle');
+            title.setAttribute('font-family', 'Arial');
+            title.setAttribute('font-size', '14');
+            title.setAttribute('fill', '#333');
+            title.textContent = `Grid ${rows}×${cols}`;
+            svg.appendChild(title);
+            
+            // Create grid lines
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('transform', `translate(${margin}, ${margin})`);
+            
+            // Vertical lines
+            for (let i = 0; i <= cols; i++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', i * cellSize);
+                line.setAttribute('y1', 0);
+                line.setAttribute('x2', i * cellSize);
+                line.setAttribute('y2', gridHeight);
+                line.setAttribute('stroke', '#333');
+                line.setAttribute('stroke-width', '1');
+                g.appendChild(line);
+            }
+            
+            // Horizontal lines
+            for (let i = 0; i <= rows; i++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', 0);
+                line.setAttribute('y1', i * cellSize);
+                line.setAttribute('x2', gridWidth);
+                line.setAttribute('y2', i * cellSize);
+                line.setAttribute('stroke', '#333');
+                line.setAttribute('stroke-width', '1');
+                g.appendChild(line);
+            }
+            
+            svg.appendChild(g);
+            
+            // Store current grid info for download
+            svg.setAttribute('data-rows', rows);
+            svg.setAttribute('data-cols', cols);
+        }
+        
+        function downloadSvg() {
+            const svg = document.getElementById('gridSvg');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = svgUrl;
+            const rows = svg.getAttribute('data-rows');
+            const cols = svg.getAttribute('data-cols');
+            downloadLink.download = `grid_${rows}x${cols}.svg`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(svgUrl);
+        }
+
+        function showCustomGrid() {
+            const input = document.getElementById('customInput').value.trim();
+            if (!input) return;
+            
+            // Extract numbers from input - very flexible parsing
+            const numbers = input.match(/\d+/g);
+            if (numbers && numbers.length >= 2) {
+                const first = parseInt(numbers[0]);
+                const second = parseInt(numbers[1]);
+                
+                // Show the custom pair
+                showPair({
+                    first: first,
+                    second: second,
+                    title: `custom ${first}/${second}`
+                });
+            } else {
+                alert('Please enter two numbers (e.g., "5 7" or "5/7" or "5,7")');
+            }
+        }
+        
+        // Allow Enter key to submit custom input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('customInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    showCustomGrid();
+                }
+            });
+        });
+
+        // Initialize buttons on page load
+        displayButtons();
+    </script>
+</body>
+</html>

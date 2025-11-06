@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Analog Watch with Date</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: white;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+        }
+
+        .watch-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .infinity-symbol {
+            position: absolute;
+            bottom: -35px;
+            font-size: 88px;
+            color: #000;
+            opacity: 0.8;
+        }
+
+        #watchCanvas {
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff, #f8f8f8);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .time-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            gap: 15px;
+        }
+
+        .time-date-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .digital-time {
+            background: white;
+            color: black;
+            padding: 12px 25px;
+            border-radius: 25px;
+            border: 2px solid black;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .digital-time:hover {
+            background: #f0f0f0;
+            transform: scale(1.02);
+        }
+
+        .time-input {
+            background: white;
+            color: #333;
+            padding: 12px 25px;
+            border-radius: 25px;
+            border: 2px solid #007acc;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            outline: none;
+            text-align: center;
+            width: 120px;
+        }
+
+        .digital-date {
+            background: #f0f0f0;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 2px solid #666;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .digital-date:hover {
+            background: #e0e0e0;
+            transform: scale(1.02);
+        }
+
+        .date-input {
+            background: white;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 2px solid #007acc;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            outline: none;
+            text-align: center;
+        }
+
+        .main-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .save-preset-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .save-preset-btn:hover {
+            background: #005a99;
+            transform: scale(1.02);
+        }
+
+        .clock-control-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+            min-width: 100px;
+        }
+
+        .clock-control-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .clock-control-btn.paused {
+            background: #28a745;
+        }
+
+        .clock-control-btn.running {
+            background: #dc3545;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .interval-btn {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .interval-btn:hover {
+            background: #e0a800;
+            transform: scale(1.02);
+        }
+
+        .interval-btn.active {
+            background: #6c757d;
+            color: white;
+        }
+
+        .interval-controls {
+            display: none;
+            margin-top: 10px;
+            gap: 10px;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .interval-controls.active {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .interval-time-input {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 5px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            width: 60px;
+            text-align: center;
+        }
+
+        .presets-container {
+            margin-top: 20px;
+            max-width: 600px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .preset-item {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            padding: 8px 15px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .preset-item:hover {
+            background: #e9e9e9;
+            transform: translateX(2px);
+        }
+
+        .preset-time-date {
+            flex: 1;
+            color: #333;
+        }
+
+        .preset-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .preset-delete:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="watch-container">
+        <canvas id="watchCanvas" width="540" height="540"></canvas>
+        <div class="infinity-symbol">∞</div>
+    </div>
+    
+    <div class="time-info">
+        <div class="time-date-display">
+            <div class="digital-time" id="digitalTime">22:30</div>
+            <div class="digital-date" id="digitalDate">January 1, 2024</div>
+        </div>
+        <div class="main-controls">
+            <button class="clock-control-btn paused" id="clockControlBtn">▶ Start</button>
+            <button class="clock-control-btn paused" id="setTimeBtn">Set Current Time</button>
+        </div>
+        <div class="control-buttons">
+            <button class="save-preset-btn" id="savePresetBtn">Save Moment</button>
+            <button class="interval-btn" id="intervalBtn">Show Interval</button>
+        </div>
+        <div class="interval-controls" id="intervalControls">
+            <span>From:</span>
+            <input type="text" class="interval-time-input" id="intervalStart" value="16:30" placeholder="HH:MM">
+            <span>To:</span>
+            <input type="text" class="interval-time-input" id="intervalEnd" value="22:30" placeholder="HH:MM">
+        </div>
+    </div>
+
+    <div class="presets-container" id="presetsContainer">
+        <!-- Saved presets will appear here -->
+    </div>
+
+    <script>
+        class AnalogWatch {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.centerX = this.canvas.width / 2;
+                this.centerY = this.canvas.height / 2;
+                this.radius = Math.min(this.centerX, this.centerY) - 20;
+                
+                // Current time
+                this.currentTime = new Date();
+                this.isDragging = false;
+                this.dragStartAngle = 0;
+                
+                // Time and date offsets
+                this.hourOffset = 0;
+                this.minuteOffset = 0;
+                this.secondOffset = 0;
+                this.dayOffset = 0;
+                this.monthOffset = 0;
+                this.yearOffset = 0;
+                
+                // Saved presets
+                this.presets = [];
+                
+                // Clock control
+                this.isRunning = false; // Start paused by default
+                
+                // Interval highlighting
+                this.showInterval = false;
+                this.intervalStart = { hour: 16, minute: 30 }; // 16:30
+                this.intervalEnd = { hour: 22, minute: 30 };   // 22:30
+                
+                // Set default time to 22:30
+                this.setDefaultTime();
+                
+                this.setupEventListeners();
+                this.startClock();
+            }
+
+            setupEventListeners() {
+                this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+                this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+                this.canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
+                this.canvas.addEventListener('mouseleave', this.onMouseUp.bind(this));
+                this.canvas.addEventListener('click', () => this.canvas.focus());
+                
+                // Date click functionality
+                document.getElementById('digitalDate').addEventListener('click', this.onDateClick.bind(this));
+                
+                // Time click functionality
+                document.getElementById('digitalTime').addEventListener('click', this.onTimeClick.bind(this));
+                
+                // Save preset functionality
+                document.getElementById('savePresetBtn').addEventListener('click', this.savePreset.bind(this));
+                
+                // Clock control functionality
+                document.getElementById('clockControlBtn').addEventListener('click', this.toggleClock.bind(this));
+                
+                // Set current time functionality
+                document.getElementById('setTimeBtn').addEventListener('click', this.setCurrentTime.bind(this));
+                
+                // Interval functionality
+                document.getElementById('intervalBtn').addEventListener('click', this.toggleInterval.bind(this));
+                document.getElementById('intervalStart').addEventListener('change', this.updateIntervalTimes.bind(this));
+                document.getElementById('intervalEnd').addEventListener('change', this.updateIntervalTimes.bind(this));
+                
+                // Keyboard controls
+                document.addEventListener('keydown', this.onKeyDown.bind(this));
+                
+                // Make canvas focusable for keyboard events
+                this.canvas.setAttribute('tabindex', '0');
+                this.canvas.focus();
+            }
+
+            onMouseDown(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left - this.centerX;
+                const mouseY = event.clientY - rect.top - this.centerY;
+                const distance = Math.sqrt(mouseX * mouseX + mouseY * mouseY);
+                
+                // Check if click is near the hour hand (within reasonable distance)
+                if (distance < this.radius * 0.7) {
+                    this.isDragging = true;
+                    this.dragStartAngle = Math.atan2(mouseY, mouseX);
+                    this.canvas.style.cursor = 'grabbing';
+                }
+            }
+
+            onMouseMove(event) {
+                if (!this.isDragging) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left - this.centerX;
+                const mouseY = event.clientY - rect.top - this.centerY;
+                const currentAngle = Math.atan2(mouseY, mouseX);
+                
+                // Calculate angle difference
+                let angleDiff = currentAngle - this.dragStartAngle;
+                
+                // Normalize angle difference to [-π, π]
+                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                
+                // Convert angle to hours (12 hours = 2π radians)
+                const hourChange = (angleDiff / (2 * Math.PI)) * 12;
+                this.hourOffset += hourChange;
+                
+                // Keep hour offset within reasonable bounds
+                if (this.hourOffset > 12) this.hourOffset -= 24;
+                if (this.hourOffset < -12) this.hourOffset += 24;
+                
+                this.dragStartAngle = currentAngle;
+                this.updateDisplay();
+            }
+
+            onMouseUp() {
+                this.isDragging = false;
+                this.canvas.style.cursor = 'pointer';
+            }
+
+            onDateClick() {
+                const dateElement = document.getElementById('digitalDate');
+                const currentDisplayTime = this.getDisplayTime();
+                
+                // Create text input for date
+                const dateInput = document.createElement('input');
+                dateInput.type = 'text';
+                dateInput.className = 'date-input';
+                dateInput.placeholder = 'YYYY-MM-DD or MM/DD/YYYY';
+                dateInput.value = currentDisplayTime.toISOString().split('T')[0];
+                
+                // Replace date display with input
+                dateElement.style.display = 'none';
+                dateElement.parentNode.insertBefore(dateInput, dateElement);
+                dateInput.focus();
+                dateInput.select(); // Select all text for easy replacement
+                
+                // Handle date parsing and validation
+                const handleDateChange = () => {
+                    const inputValue = dateInput.value.trim();
+                    if (!inputValue) {
+                        this.restoreDateDisplay();
+                        return;
+                    }
+                    
+                    let selectedDate = null;
+                    
+                    // Try to parse different date formats
+                    if (inputValue.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
+                        // YYYY-MM-DD format
+                        selectedDate = new Date(inputValue + 'T00:00:00');
+                    } else if (inputValue.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                        // MM/DD/YYYY format
+                        selectedDate = new Date(inputValue + ' 00:00:00');
+                    } else if (inputValue.match(/^\d{1,2}-\d{1,2}-\d{4}$/)) {
+                        // MM-DD-YYYY format
+                        const parts = inputValue.split('-');
+                        selectedDate = new Date(`${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}T00:00:00`);
+                    } else if (inputValue.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+                        // DD.MM.YYYY format
+                        const parts = inputValue.split('.');
+                        selectedDate = new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}T00:00:00`);
+                    } else {
+                        // Try to parse as a general date string
+                        selectedDate = new Date(inputValue + ' 00:00:00');
+                    }
+                    
+                    // Validate the parsed date
+                    if (selectedDate && !isNaN(selectedDate.getTime())) {
+                        const currentTime = new Date(this.currentTime);
+                        
+                        // Calculate the difference in days
+                        const currentDateOnly = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate());
+                        const timeDiff = selectedDate.getTime() - currentDateOnly.getTime();
+                        const daysDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24));
+                        
+                        // Update offsets to reflect the selected date
+                        this.dayOffset = daysDiff;
+                        this.monthOffset = 0;
+                        this.yearOffset = 0;
+                        
+                        this.restoreDateDisplay();
+                        this.updateDisplay();
+                    } else {
+                        // Invalid date - show error and restore
+                        dateInput.style.borderColor = '#ff0000';
+                        dateInput.style.backgroundColor = '#ffe6e6';
+                        setTimeout(() => {
+                            this.restoreDateDisplay();
+                        }, 1500);
+                    }
+                };
+                
+                // Handle input events
+                dateInput.addEventListener('input', () => {
+                    // Reset error styling on new input
+                    dateInput.style.borderColor = '#007acc';
+                    dateInput.style.backgroundColor = 'white';
+                });
+                
+                dateInput.addEventListener('blur', () => {
+                    handleDateChange();
+                });
+                
+                dateInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        handleDateChange();
+                    } else if (e.key === 'Escape') {
+                        this.restoreDateDisplay();
+                    }
+                });
+            }
+
+            onTimeClick() {
+                const timeElement = document.getElementById('digitalTime');
+                const currentDisplayTime = this.getDisplayTime();
+                
+                // Create text input for time
+                const timeInput = document.createElement('input');
+                timeInput.type = 'text';
+                timeInput.className = 'time-input';
+                timeInput.placeholder = 'HH:MM';
+                const hours = currentDisplayTime.getHours().toString().padStart(2, '0');
+                const minutes = currentDisplayTime.getMinutes().toString().padStart(2, '0');
+                timeInput.value = `${hours}:${minutes}`;
+                
+                // Replace time display with input
+                timeElement.style.display = 'none';
+                timeElement.parentNode.insertBefore(timeInput, timeElement);
+                timeInput.focus();
+                timeInput.select(); // Select all text for easy replacement
+                
+                // Handle time parsing and validation
+                const handleTimeChange = () => {
+                    const inputValue = timeInput.value.trim();
+                    if (!inputValue) {
+                        this.restoreTimeDisplay();
+                        return;
+                    }
+                    
+                    const parsedTime = this.parseTimeString(inputValue);
+                    
+                    if (parsedTime) {
+                        const currentTime = new Date(this.currentTime);
+                        const targetHour = parsedTime.hour;
+                        const targetMinute = parsedTime.minute;
+                        
+                        // Calculate offset from current time
+                        const currentHour = currentTime.getHours();
+                        const currentMinute = currentTime.getMinutes();
+                        
+                        let hourDiff = targetHour - currentHour;
+                        let minuteDiff = targetMinute - currentMinute;
+                        
+                        // Convert minute difference to hour offset if needed
+                        if (minuteDiff !== 0) {
+                            hourDiff += minuteDiff / 60;
+                        }
+                        
+                        // Update offsets
+                        this.hourOffset = hourDiff;
+                        this.minuteOffset = 0;
+                        this.secondOffset = 0;
+                        
+                        this.restoreTimeDisplay();
+                        this.updateDisplay();
+                    } else {
+                        // Invalid time - show error and restore
+                        timeInput.style.borderColor = '#ff0000';
+                        timeInput.style.backgroundColor = '#ffe6e6';
+                        setTimeout(() => {
+                            this.restoreTimeDisplay();
+                        }, 1500);
+                    }
+                };
+                
+                // Handle input events
+                timeInput.addEventListener('input', () => {
+                    // Reset error styling on new input
+                    timeInput.style.borderColor = '#007acc';
+                    timeInput.style.backgroundColor = 'white';
+                });
+                
+                timeInput.addEventListener('blur', () => {
+                    handleTimeChange();
+                });
+                
+                timeInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        handleTimeChange();
+                    } else if (e.key === 'Escape') {
+                        this.restoreTimeDisplay();
+                    }
+                });
+            }
+
+            parseTimeString(timeStr) {
+                // Remove any spaces
+                timeStr = timeStr.replace(/\s/g, '');
+                
+                // Try different time formats
+                let match;
+                
+                // HH:MM format (24-hour)
+                match = timeStr.match(/^(\d{1,2}):(\d{1,2})$/);
+                if (match) {
+                    const hour = parseInt(match[1], 10);
+                    const minute = parseInt(match[2], 10);
+                    
+                    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                        return { hour, minute };
+                    }
+                }
+                
+                // HHMM format (no colon)
+                match = timeStr.match(/^(\d{2})(\d{2})$/);
+                if (match) {
+                    const hour = parseInt(match[1], 10);
+                    const minute = parseInt(match[2], 10);
+                    
+                    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                        return { hour, minute };
+                    }
+                }
+                
+                // H:MM AM/PM format
+                match = timeStr.match(/^(\d{1,2}):(\d{1,2})\s*(am|pm)$/i);
+                if (match) {
+                    let hour = parseInt(match[1], 10);
+                    const minute = parseInt(match[2], 10);
+                    const period = match[3].toLowerCase();
+                    
+                    if (hour >= 1 && hour <= 12 && minute >= 0 && minute <= 59) {
+                        if (period === 'pm' && hour !== 12) {
+                            hour += 12;
+                        } else if (period === 'am' && hour === 12) {
+                            hour = 0;
+                        }
+                        
+                        return { hour, minute };
+                    }
+                }
+                
+                // HMM format (single digit hour, no colon)
+                match = timeStr.match(/^(\d)(\d{2})$/);
+                if (match) {
+                    const hour = parseInt(match[1], 10);
+                    const minute = parseInt(match[2], 10);
+                    
+                    if (hour >= 0 && hour <= 9 && minute >= 0 && minute <= 59) {
+                        return { hour, minute };
+                    }
+                }
+                
+                // HH format (just hour)
+                match = timeStr.match(/^(\d{1,2})$/);
+                if (match) {
+                    const hour = parseInt(match[1], 10);
+                    
+                    if (hour >= 0 && hour <= 23) {
+                        return { hour, minute: 0 };
+                    }
+                }
+                
+                return null;
+            }
+
+            restoreTimeDisplay() {
+                const timeElement = document.getElementById('digitalTime');
+                const timeInput = document.querySelector('.time-input');
+                
+                if (timeInput) {
+                    timeInput.remove();
+                }
+                timeElement.style.display = 'block';
+            }
+
+            restoreDateDisplay() {
+                const dateElement = document.getElementById('digitalDate');
+                const dateInput = document.querySelector('.date-input');
+                
+                if (dateInput) {
+                    dateInput.remove();
+                }
+                dateElement.style.display = 'block';
+            }
+
+            onKeyDown(event) {
+                if (event.shiftKey) {
+                    // Date controls with Shift
+                    switch(event.key) {
+                        case 'ArrowUp':
+                            event.preventDefault();
+                            this.dayOffset += 1;
+                            this.updateDisplay();
+                            break;
+                        case 'ArrowDown':
+                            event.preventDefault();
+                            this.dayOffset -= 1;
+                            this.updateDisplay();
+                            break;
+                        case 'ArrowRight':
+                            event.preventDefault();
+                            this.monthOffset += 1;
+                            this.updateDisplay();
+                            break;
+                        case 'ArrowLeft':
+                            event.preventDefault();
+                            this.monthOffset -= 1;
+                            this.updateDisplay();
+                            break;
+                    }
+                } else {
+                    // Time controls without Shift
+                    switch(event.key) {
+                        case 'ArrowUp':
+                            event.preventDefault();
+                            this.minuteOffset += 3;
+                            this.updateDisplay();
+                            break;
+                        case 'ArrowDown':
+                            event.preventDefault();
+                            this.minuteOffset -= 3;
+                            this.updateDisplay();
+                            break;
+                        case 'ArrowRight':
+                            event.preventDefault();
+                            this.secondOffset += 30;
+                            if (this.secondOffset >= 60) {
+                                this.minuteOffset += Math.floor(this.secondOffset / 60);
+                                this.secondOffset = this.secondOffset % 60;
+                            }
+                            this.updateDisplay();
+                            break;
+                        case 'ArrowLeft':
+                            event.preventDefault();
+                            this.secondOffset -= 30;
+                            if (this.secondOffset < 0) {
+                                this.minuteOffset += Math.floor(this.secondOffset / 60);
+                                this.secondOffset = ((this.secondOffset % 60) + 60) % 60;
+                            }
+                            this.updateDisplay();
+                            break;
+                        case 'r':
+                        case 'R':
+                            event.preventDefault();
+                            this.resetToCurrentTime();
+                            break;
+                    }
+                }
+                
+                // Normalize minute overflow/underflow
+                if (this.minuteOffset >= 60) {
+                    this.hourOffset += Math.floor(this.minuteOffset / 60);
+                    this.minuteOffset = this.minuteOffset % 60;
+                } else if (this.minuteOffset < 0) {
+                    this.hourOffset += Math.floor(this.minuteOffset / 60);
+                    this.minuteOffset = ((this.minuteOffset % 60) + 60) % 60;
+                }
+                
+                // Normalize hour overflow/underflow
+                if (this.hourOffset >= 24) {
+                    this.dayOffset += Math.floor(this.hourOffset / 24);
+                    this.hourOffset = this.hourOffset % 24;
+                } else if (this.hourOffset < 0) {
+                    this.dayOffset += Math.floor(this.hourOffset / 24);
+                    this.hourOffset = ((this.hourOffset % 24) + 24) % 24;
+                }
+            }
+
+            resetToCurrentTime() {
+                this.hourOffset = 0;
+                this.minuteOffset = 0;
+                this.secondOffset = 0;
+                this.dayOffset = 0;
+                this.monthOffset = 0;
+                this.yearOffset = 0;
+                this.updateTime(); // Update to current time when resetting
+                this.updateDisplay();
+            }
+
+            setCurrentTime() {
+                // Reset all offsets to show current time
+                this.hourOffset = 0;
+                this.minuteOffset = 0;
+                this.secondOffset = 0;
+                this.dayOffset = 0;
+                this.monthOffset = 0;
+                this.yearOffset = 0;
+                this.updateTime(); // Update to current time
+                this.updateDisplay();
+            }
+
+            setDefaultTime() {
+                // Set time to 22:30 (10:30 PM)
+                const now = new Date();
+                const targetTime = new Date(now);
+                targetTime.setHours(22, 30, 0, 0); // Set to 22:30:00
+                
+                // Calculate offset from current time to 22:30
+                const timeDiff = targetTime.getTime() - now.getTime();
+                const hoursDiff = timeDiff / (1000 * 60 * 60);
+                
+                this.hourOffset = hoursDiff;
+                this.minuteOffset = 0;
+                this.secondOffset = 0;
+                this.dayOffset = 0;
+                this.monthOffset = 0;
+                this.yearOffset = 0;
+            }
+
+            savePreset() {
+                const displayTime = this.getDisplayTime();
+                const preset = {
+                    id: Date.now(), // Simple unique ID
+                    hourOffset: this.hourOffset,
+                    minuteOffset: this.minuteOffset,
+                    secondOffset: this.secondOffset,
+                    dayOffset: this.dayOffset,
+                    monthOffset: this.monthOffset,
+                    yearOffset: this.yearOffset,
+                    displayTime: new Date(displayTime),
+                    savedAt: new Date()
+                };
+                
+                this.presets.unshift(preset); // Add to beginning of array
+                this.renderPresets();
+            }
+
+            loadPreset(presetId) {
+                const preset = this.presets.find(p => p.id === presetId);
+                if (preset) {
+                    this.hourOffset = preset.hourOffset;
+                    this.minuteOffset = preset.minuteOffset;
+                    this.secondOffset = preset.secondOffset;
+                    this.dayOffset = preset.dayOffset;
+                    this.monthOffset = preset.monthOffset;
+                    this.yearOffset = preset.yearOffset;
+                    this.updateDisplay();
+                }
+            }
+
+            deletePreset(presetId) {
+                this.presets = this.presets.filter(p => p.id !== presetId);
+                this.renderPresets();
+            }
+
+            renderPresets() {
+                const container = document.getElementById('presetsContainer');
+                
+                if (this.presets.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+                
+                container.innerHTML = this.presets.map(preset => {
+                    const timeStr = preset.displayTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    const dateStr = preset.displayTime.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                    
+                    return `
+                        <div class="preset-item" data-preset-id="${preset.id}">
+                            <div class="preset-time-date">${timeStr} - ${dateStr}</div>
+                            <button class="preset-delete" data-preset-id="${preset.id}">×</button>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Add event listeners to the newly created elements
+                container.querySelectorAll('.preset-item').forEach(item => {
+                    const presetId = parseInt(item.dataset.presetId);
+                    item.addEventListener('click', (e) => {
+                        if (!e.target.classList.contains('preset-delete')) {
+                            this.loadPreset(presetId);
+                        }
+                    });
+                });
+                
+                container.querySelectorAll('.preset-delete').forEach(button => {
+                    const presetId = parseInt(button.dataset.presetId);
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.deletePreset(presetId);
+                    });
+                });
+            }
+
+            startClock() {
+                // Set initial time but don't start running
+                this.updateTime();
+                this.updateDisplay();
+                
+                setInterval(() => {
+                    if (!this.isDragging && this.isRunning) {
+                        this.updateTime();
+                    }
+                }, 1000);
+                
+                // Update display continuously for smooth dragging
+                setInterval(() => {
+                    this.updateDisplay();
+                }, 50);
+            }
+
+            toggleClock() {
+                this.isRunning = !this.isRunning;
+                this.updateClockButton();
+                
+                if (this.isRunning) {
+                    // When starting, update to current time to sync
+                    this.updateTime();
+                }
+            }
+
+            updateClockButton() {
+                const button = document.getElementById('clockControlBtn');
+                if (this.isRunning) {
+                    button.textContent = '⏸ Pause';
+                    button.className = 'clock-control-btn running';
+                } else {
+                    button.textContent = '▶ Start';
+                    button.className = 'clock-control-btn paused';
+                }
+            }
+
+            toggleInterval() {
+                this.showInterval = !this.showInterval;
+                this.updateIntervalButton();
+                this.updateDisplay();
+            }
+
+            updateIntervalButton() {
+                const button = document.getElementById('intervalBtn');
+                const controls = document.getElementById('intervalControls');
+                
+                if (this.showInterval) {
+                    button.textContent = 'Hide Interval';
+                    button.classList.add('active');
+                    controls.classList.add('active');
+                } else {
+                    button.textContent = 'Show Interval';
+                    button.classList.remove('active');
+                    controls.classList.remove('active');
+                }
+            }
+
+            updateIntervalTimes() {
+                const startInput = document.getElementById('intervalStart');
+                const endInput = document.getElementById('intervalEnd');
+                
+                const startTime = this.parseTimeInput(startInput.value);
+                const endTime = this.parseTimeInput(endInput.value);
+                
+                if (startTime) {
+                    this.intervalStart = startTime;
+                }
+                if (endTime) {
+                    this.intervalEnd = endTime;
+                }
+                
+                this.updateDisplay();
+            }
+
+            parseTimeInput(timeStr) {
+                const match = timeStr.match(/^(\d{1,2}):(\d{1,2})$/);
+                if (match) {
+                    const hour = parseInt(match[1], 10);
+                    const minute = parseInt(match[2], 10);
+                    
+                    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                        return { hour, minute };
+                    }
+                }
+                return null;
+            }
+
+            updateTime() {
+                this.currentTime = new Date();
+            }
+
+            getDisplayTime() {
+                // Start with current time
+                const baseTime = new Date(this.currentTime);
+                
+                // Apply time offsets
+                const totalOffsetMs = (this.hourOffset * 60 * 60 + this.minuteOffset * 60 + this.secondOffset) * 1000;
+                const timeWithOffset = new Date(baseTime.getTime() + totalOffsetMs);
+                
+                // Apply date offsets
+                const displayTime = new Date(timeWithOffset);
+                displayTime.setDate(displayTime.getDate() + this.dayOffset);
+                displayTime.setMonth(displayTime.getMonth() + this.monthOffset);
+                displayTime.setFullYear(displayTime.getFullYear() + this.yearOffset);
+                
+                return displayTime;
+            }
+
+            updateDisplay() {
+                this.drawWatch();
+                this.updateDigitalTime();
+                this.updateDigitalDate();
+            }
+
+            drawWatch() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw watch face
+                this.drawWatchFace();
+                
+                // Draw interval highlight (before hour markers so it's behind them)
+                if (this.showInterval) {
+                    this.drawInterval();
+                }
+                
+                // Draw hour markers
+                this.drawHourMarkers();
+                
+                // Draw hands
+                this.drawHands();
+                
+                // Draw center dot
+                this.drawCenter();
+            }
+
+            drawWatchFace() {
+                // Clean white watch face
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, this.radius, 0, 2 * Math.PI);
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fill();
+                
+                // Add thick black border
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, this.radius, 0, 2 * Math.PI);
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 6;
+                this.ctx.stroke();
+            }
+
+            drawInterval() {
+                // Convert time to angle (12 o'clock = -π/2)
+                const startAngle = this.timeToAngle(this.intervalStart.hour, this.intervalStart.minute);
+                let endAngle = this.timeToAngle(this.intervalEnd.hour, this.intervalEnd.minute);
+                
+                // Handle case where interval crosses midnight
+                if (endAngle <= startAngle) {
+                    endAngle += 2 * Math.PI;
+                }
+                
+                // Draw pie slice from center
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.centerX, this.centerY); // Start from center
+                this.ctx.arc(this.centerX, this.centerY, this.radius - 10, startAngle, endAngle);
+                this.ctx.lineTo(this.centerX, this.centerY); // Back to center
+                this.ctx.closePath();
+                
+                // Fill with semi-transparent grey
+                this.ctx.fillStyle = 'rgba(108, 117, 125, 0.4)'; // Grey with transparency
+                this.ctx.fill();
+                
+                // Add border to the pie slice
+                this.ctx.strokeStyle = 'rgba(108, 117, 125, 0.7)';
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+            }
+
+            timeToAngle(hour, minute) {
+                // Convert 24-hour time to 12-hour for the clock face
+                const hour12 = hour % 12;
+                const totalMinutes = hour12 * 60 + minute;
+                // Convert to radians: 720 minutes = 2π radians, starting from -π/2 (12 o'clock)
+                return (totalMinutes / 720) * 2 * Math.PI - Math.PI / 2;
+            }
+
+            drawHourMarkers() {
+                this.ctx.strokeStyle = '#333333';
+                this.ctx.fillStyle = '#333333';
+                this.ctx.font = 'bold 36px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                
+                for (let i = 1; i <= 12; i++) {
+                    const angle = (i * Math.PI) / 6 - Math.PI / 2;
+                    
+                    // Hour numbers
+                    const numberX = this.centerX + Math.cos(angle) * (this.radius - 50);
+                    const numberY = this.centerY + Math.sin(angle) * (this.radius - 50);
+                    this.ctx.fillText(i.toString(), numberX, numberY);
+                    
+                    // Hour marks
+                    const startX = this.centerX + Math.cos(angle) * (this.radius - 25);
+                    const startY = this.centerY + Math.sin(angle) * (this.radius - 25);
+                    const endX = this.centerX + Math.cos(angle) * (this.radius - 8);
+                    const endY = this.centerY + Math.sin(angle) * (this.radius - 8);
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(startX, startY);
+                    this.ctx.lineTo(endX, endY);
+                    this.ctx.lineWidth = 5;
+                    this.ctx.stroke();
+                }
+                
+                // Minute marks
+                this.ctx.strokeStyle = '#666666';
+                this.ctx.lineWidth = 2;
+                
+                for (let i = 0; i < 60; i++) {
+                    if (i % 5 !== 0) { // Skip hour positions
+                        const angle = (i * Math.PI) / 30 - Math.PI / 2;
+                        const startX = this.centerX + Math.cos(angle) * (this.radius - 15);
+                        const startY = this.centerY + Math.sin(angle) * (this.radius - 15);
+                        const endX = this.centerX + Math.cos(angle) * (this.radius - 8);
+                        const endY = this.centerY + Math.sin(angle) * (this.radius - 8);
+                        
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(startX, startY);
+                        this.ctx.lineTo(endX, endY);
+                        this.ctx.stroke();
+                    }
+                }
+            }
+
+            drawHands() {
+                const displayTime = this.getDisplayTime();
+                const hours = displayTime.getHours() % 12;
+                const minutes = displayTime.getMinutes();
+                
+                // Calculate angles
+                const hourAngle = (hours + minutes / 60) * (Math.PI / 6) - Math.PI / 2;
+                const minuteAngle = minutes * (Math.PI / 30) - Math.PI / 2;
+                
+                // Draw hour hand
+                this.ctx.strokeStyle = '#333333';
+                this.ctx.lineWidth = 10;
+                this.ctx.lineCap = 'round';
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.centerX, this.centerY);
+                this.ctx.lineTo(
+                    this.centerX + Math.cos(hourAngle) * (this.radius * 0.5),
+                    this.centerY + Math.sin(hourAngle) * (this.radius * 0.5)
+                );
+                this.ctx.stroke();
+                
+                // Draw minute hand
+                this.ctx.strokeStyle = '#666666';
+                this.ctx.lineWidth = 6;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.centerX, this.centerY);
+                this.ctx.lineTo(
+                    this.centerX + Math.cos(minuteAngle) * (this.radius * 0.75),
+                    this.centerY + Math.sin(minuteAngle) * (this.radius * 0.75)
+                );
+                this.ctx.stroke();
+            }
+
+            drawCenter() {
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, 12, 0, 2 * Math.PI);
+                this.ctx.fillStyle = '#333333';
+                this.ctx.fill();
+            }
+
+            updateDigitalTime() {
+                const displayTime = this.getDisplayTime();
+                const hours = displayTime.getHours().toString().padStart(2, '0');
+                const minutes = displayTime.getMinutes().toString().padStart(2, '0');
+                document.getElementById('digitalTime').textContent = `${hours}:${minutes}`;
+            }
+
+            updateDigitalDate() {
+                const displayTime = this.getDisplayTime();
+                const options = { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    weekday: 'long'
+                };
+                const dateString = displayTime.toLocaleDateString('en-US', options);
+                document.getElementById('digitalDate').textContent = dateString;
+            }
+        }
+
+        // Initialize the watch when the page loads
+        window.addEventListener('load', () => {
+            new AnalogWatch('watchCanvas');
+        });
+    </script>
+</body>
+</html>

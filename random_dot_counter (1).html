@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Number Counter</title>
+  <!-- Favicon: Black Filled Circle -->
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/25/25694.png" type="image/png">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/25/25694.png" type="image/png">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      font-family: sans-serif;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1em;
+      margin: 0.5em 0;
+    }
+    h1 {
+      font-size: 6vw;
+      margin: 0;
+      cursor: pointer;
+    }
+    input#number-input {
+      font-size: 6vw;
+      text-align: center;
+      width: 4ch;
+    }
+    #reset {
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2em;
+      touch-action: manipulation;
+    }
+    .double-line {
+      width: 100%;
+      border-top: 5px double #333;
+      margin: 1em 0;
+    }
+    #dots {
+      position: relative;
+      margin: 2em auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ddd;
+    }
+    .dot {
+      background: #333;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      margin-bottom: 1em;
+    }
+    .nav button {
+      font-size: 2em;
+      background: none;
+      border: none;
+      padding: 0.5em;
+      touch-action: manipulation;
+      cursor: pointer;
+    }
+    .presets-controls {
+      display: flex;
+      gap: 1em;
+      margin-top: 1em;
+    }
+    #save-preset,
+    #save-svg,
+    #delete-presets {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      cursor: pointer;
+      background: #eee;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      max-width: 90%;
+      justify-content: center;
+      margin-top: 1em;
+    }
+    .preset-btn {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      background: #eee;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="title-row">
+    <h1 id="number">1</h1>
+    <button id="reset" aria-label="Reset">↺</button>
+  </div>
+
+  <div class="double-line"></div>
+  <div id="dots"></div>
+  <div class="double-line"></div>
+
+  <div class="nav">
+    <button id="prev" aria-label="Previous"><</button>
+    <button id="next" aria-label="Next">></button>
+  </div>
+
+  <div class="presets-controls">
+    <button id="save-preset">Save Preset</button>
+    <button id="save-svg">Save as SVG</button>
+    <button id="delete-presets">Delete Presets</button>
+  </div>
+  <div class="presets" id="presets-container"></div>
+
+  <script>
+    (function() {
+      let current = 1;
+      const numEl = document.getElementById('number');
+      const dotsEl = document.getElementById('dots');
+      const prevBtn = document.getElementById('prev');
+      const nextBtn = document.getElementById('next');
+      const resetBtn = document.getElementById('reset');
+      const saveBtn = document.getElementById('save-preset');
+      const deleteBtn = document.getElementById('delete-presets');
+      const presetsContainer = document.getElementById('presets-container');
+
+      function calculateLayout(count) {
+        if (count === 0) return { dotSize: 10, containerSize: 400 };
+        
+        // More aggressive scaling for better packing
+        let dotSize;
+        if (count <= 20) dotSize = 16;
+        else if (count <= 50) dotSize = 12;
+        else if (count <= 100) dotSize = 9;
+        else if (count <= 200) dotSize = 7;
+        else if (count <= 400) dotSize = 5;
+        else if (count <= 800) dotSize = 4;
+        else dotSize = 3;
+        
+        // Conservative minimum distance - must be larger than dot size
+        const minDistance = dotSize + Math.max(3, Math.ceil(dotSize * 0.4));
+        
+        // Calculate container size based on area needed (2x larger)
+        const totalArea = count * minDistance * minDistance;
+        const radius = Math.sqrt(totalArea / Math.PI) * 1.3;
+        let containerSize = Math.max(600, radius * 2 * 2);
+        
+        // Allow growth to fit screen (2x larger)
+        const maxSize = Math.min(window.innerWidth * 1.8, window.innerHeight * 1.4);
+        containerSize = Math.min(containerSize, maxSize);
+        
+        return { dotSize, containerSize, minDistance };
+      }
+
+      function isValidPosition(x, y, dotSize, positions, minDistance) {
+        const centerX = x + dotSize / 2;
+        const centerY = y + dotSize / 2;
+        
+        for (const pos of positions) {
+          const existingCenterX = pos.x + dotSize / 2;
+          const existingCenterY = pos.y + dotSize / 2;
+          
+          const distance = Math.sqrt(
+            Math.pow(centerX - existingCenterX, 2) + 
+            Math.pow(centerY - existingCenterY, 2)
+          );
+          
+          if (distance < minDistance) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function generatePositions(count) {
+        const { dotSize, containerSize, minDistance } = calculateLayout(count);
+        const positions = [];
+        
+        if (count === 0) return { positions, dotSize, containerSize };
+        
+        const centerX = containerSize / 2;
+        const centerY = containerSize / 2;
+        const maxRadius = (containerSize / 2) - dotSize - 10;
+        
+        // Place first dot at center
+        positions.push({
+          x: centerX - dotSize / 2,
+          y: centerY - dotSize / 2
+        });
+        
+        // Place remaining dots
+        for (let i = 1; i < count; i++) {
+          let placed = false;
+          let attempts = 0;
+          
+          // Try random placement with spiral bias
+          while (!placed && attempts < 300) {
+            let x, y;
+            
+            if (attempts < 200) {
+              // Spiral-based placement with randomness
+              const baseAngle = i * 2.39996; // Golden angle
+              const spiralRadius = Math.sqrt(i) * (minDistance * 0.7);
+              
+              // Add randomness to angle and radius
+              const angle = baseAngle + (Math.random() - 0.5) * 1.0;
+              const radius = spiralRadius + (Math.random() - 0.5) * minDistance;
+              const actualRadius = Math.min(radius, maxRadius);
+              
+              x = centerX + Math.cos(angle) * actualRadius - dotSize / 2;
+              y = centerY + Math.sin(angle) * actualRadius - dotSize / 2;
+            } else {
+              // Pure random placement for remaining attempts
+              const angle = Math.random() * 2 * Math.PI;
+              const radius = Math.random() * maxRadius;
+              
+              x = centerX + Math.cos(angle) * radius - dotSize / 2;
+              y = centerY + Math.sin(angle) * radius - dotSize / 2;
+            }
+            
+            // Ensure within bounds
+            x = Math.max(5, Math.min(x, containerSize - dotSize - 5));
+            y = Math.max(5, Math.min(y, containerSize - dotSize - 5));
+            
+            // Check for collisions
+            if (isValidPosition(x, y, dotSize, positions, minDistance)) {
+              positions.push({ x, y });
+              placed = true;
+            }
+            
+            attempts++;
+          }
+          
+          // If still not placed, use guaranteed safe position
+          if (!placed) {
+            const safeAngle = i * 2.39996;
+            let safeRadius = Math.sqrt(i + 1) * minDistance;
+            
+            // Find a safe radius
+            while (safeRadius < maxRadius) {
+              const x = Math.max(5, Math.min(centerX + Math.cos(safeAngle) * safeRadius - dotSize / 2, containerSize - dotSize - 5));
+              const y = Math.max(5, Math.min(centerY + Math.sin(safeAngle) * safeRadius - dotSize / 2, containerSize - dotSize - 5));
+              
+              if (isValidPosition(x, y, dotSize, positions, minDistance)) {
+                positions.push({ x, y });
+                placed = true;
+                break;
+              }
+              
+              safeRadius += minDistance * 0.5;
+            }
+            
+            // Ultimate fallback - place at edge
+            if (!placed) {
+              const edgeX = 5 + (i % 10) * (minDistance + 2);
+              const edgeY = 5 + Math.floor(i / 10) * (minDistance + 2);
+              positions.push({ 
+                x: Math.min(edgeX, containerSize - dotSize - 5), 
+                y: Math.min(edgeY, containerSize - dotSize - 5) 
+              });
+            }
+          }
+        }
+        
+        return { positions, dotSize, containerSize };
+      }
+
+      function render() {
+        numEl.textContent = current;
+        
+        const { positions, dotSize, containerSize } = generatePositions(current);
+        
+        // Update container
+        dotsEl.style.width = containerSize + 'px';
+        dotsEl.style.height = containerSize + 'px';
+        
+        // Clear and create dots
+        dotsEl.innerHTML = '';
+        
+        positions.forEach(pos => {
+          const dot = document.createElement('div');
+          dot.className = 'dot';
+          dot.style.left = pos.x + 'px';
+          dot.style.top = pos.y + 'px';
+          dot.style.width = dotSize + 'px';
+          dot.style.height = dotSize + 'px';
+          dotsEl.appendChild(dot);
+        });
+      }
+
+      function change(delta) {
+        const next = current + delta;
+        if (next < 0) return;
+        current = next;
+        render();
+      }
+
+      // Number editable on click
+      numEl.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = 'number-input';
+        input.value = current;
+        numEl.replaceWith(input);
+        input.focus();
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            const val = parseInt(input.value, 10);
+            if (!isNaN(val) && val >= 0) current = val;
+            input.blur();
+          }
+        });
+        input.addEventListener('blur', () => {
+          input.replaceWith(numEl);
+          render();
+        });
+      });
+
+      // Button clicks
+      prevBtn.addEventListener('click', () => change(-1));
+      nextBtn.addEventListener('click', () => change(1));
+      resetBtn.addEventListener('click', () => { current = 0; render(); });
+
+      // Save preset
+      saveBtn.addEventListener('click', () => {
+        const btn = document.createElement('button');
+        btn.textContent = current;
+        btn.className = 'preset-btn';
+        btn.addEventListener('click', () => {
+          current = parseInt(btn.textContent, 10);
+          render();
+        });
+        presetsContainer.appendChild(btn);
+      });
+
+      // Delete presets
+      deleteBtn.addEventListener('click', () => {
+        presetsContainer.innerHTML = '';
+      });
+
+      // Keyboard arrows & reset
+      document.addEventListener('keydown', e => {
+        if (document.activeElement.tagName !== 'INPUT') {
+          if (e.key === 'ArrowLeft') change(-1);
+          if (e.key === 'ArrowRight') change(1);
+          if (e.key === 'r' || e.key === 'R') { current = 0; render(); }
+        }
+      });
+
+      // Mobile: tap left/right half
+      document.addEventListener('touchstart', e => {
+        const x = e.touches[0].clientX;
+        if (x < window.innerWidth/2) change(-1);
+        else change(1);
+      });
+
+      // Re-render on window resize
+      window.addEventListener('resize', () => {
+        setTimeout(render, 100);
+      });
+
+      render();
+    })();
+  </script>
+
+</body>
+</html>

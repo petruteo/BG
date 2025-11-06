@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S&P 500 Ticker Navigator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232196F3'/><stop offset='100%25' style='stop-color:%234CAF50'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g)'/><path d='M 20 70 L 35 50 L 50 60 L 65 35 L 80 45' stroke='white' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='35' cy='50' r='4' fill='white'/><circle cx='50' cy='60' r='4' fill='white'/><circle cx='65' cy='35' r='4' fill='white'/><circle cx='80' cy='45' r='4' fill='white'/></svg>">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .container {
+            text-align: center;
+            background: white;
+            border-radius: 20px;
+            padding: 60px 80px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .ticker {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 2px;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .percentage {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #666;
+            transition: opacity 0.3s ease;
+        }
+        
+        .percentage.hidden {
+            display: none;
+        }
+        
+        .toggle-percentage-btn {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            color: #666;
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .toggle-percentage-btn:hover {
+            background: #e8e8e8;
+        }
+        
+        .company-name {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: #666;
+            font-weight: 400;
+        }
+        
+        .datetime-display {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .time {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .time:hover {
+            background: #f5f5f5;
+        }
+        
+        .date {
+            font-size: 1.3rem;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .date:hover {
+            background: #f5f5f5;
+        }
+        
+        .edit-input {
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+            background: #fff;
+            border: 2px solid #2196F3;
+            border-radius: 5px;
+            padding: 5px 10px;
+            text-align: center;
+            font-family: inherit;
+        }
+        
+        .date-picker {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .date-picker-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .date-picker-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .time-range-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .time-range-btn {
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+            min-width: 70px;
+        }
+        
+        .time-range-btn:hover {
+            background: #e8e8e8;
+            border-color: #bbb;
+        }
+        
+        .time-range-btn.active {
+            background: #2196F3;
+            border-color: #0b7dda;
+            color: white;
+        }
+        
+        .time-range-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .days-container {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        
+        .weekday-boxes {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .weekday-box {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            min-width: 60px;
+            flex: 0 0 auto;
+        }
+        
+        .weekday-box.small {
+            min-width: 45px;
+            padding: 6px 8px;
+            font-size: 0.85rem;
+        }
+        
+        .weekday-box:hover {
+            background: #e8e8e8;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .weekday-box.active {
+            background: #2196F3;
+            border-color: #0b7dda;
+            color: white;
+        }
+        
+        .weekday-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .weekday-box.small .weekday-name {
+            font-size: 0.6rem;
+        }
+        
+        .weekday-date {
+            font-size: 0.8rem;
+        }
+        
+        .weekday-box.small .weekday-date {
+            font-size: 0.7rem;
+        }
+        
+        .month-box {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .month-box:hover {
+            background: #e8e8e8;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .position {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+        }
+        
+        .nav-button {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            color: black;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-button:hover:not(:disabled) {
+            background: #e8e8e8;
+            transform: translateY(-2px);
+        }
+        
+        .nav-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #333 0%, #666 100%);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .save-button {
+            background: #4CAF50;
+            border: 1px solid #45a049;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+        
+        .save-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .save-button.saved {
+            background: #888;
+            border-color: #666;
+            cursor: default;
+        }
+        
+        .saved-list-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .saved-list-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .open-all-button {
+            background: #2196F3;
+            border: 1px solid #0b7dda;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .open-all-button:hover {
+            background: #0b7dda;
+            transform: translateY(-2px);
+        }
+        
+        .open-all-button:disabled {
+            background: #ccc;
+            border-color: #aaa;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .delete-all-button {
+            background: #f44336;
+            border: 1px solid #da190b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .delete-all-button:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+        
+        .delete-all-button:disabled {
+            background: #ccc;
+            border-color: #aaa;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 0;
+        }
+        
+        .saved-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .saved-table th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .saved-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .saved-table tr:hover {
+            background: #fafafa;
+        }
+        
+        .table-ticker {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .table-company {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .table-link {
+            color: #2196F3;
+            text-decoration: none;
+            padding: 6px 12px;
+            background: white;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            border: 1px solid #2196F3;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+        
+        .table-link:hover {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .table-remove {
+            background: #f44336;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .table-remove:hover {
+            background: #da190b;
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="container">
+            <button class="toggle-percentage-btn" id="togglePercentageBtn" onclick="togglePercentage()">Hide %</button>
+            <div class="ticker">
+                <span id="ticker">NVDA</span>
+                <span class="percentage" id="percentage">__%</span>
+            </div>
+            <div class="company-name" id="companyName">NVIDIA Corporation</div>
+            <div class="datetime-display">
+                <div class="time" id="currentTime">00:00:00</div>
+                <div class="date" id="currentDate">Loading...</div>
+                
+                <div class="date-picker">
+                    <div class="date-picker-section">
+                        <div class="date-picker-label">Period:</div>
+                        <div class="time-range-selector">
+                            <button class="time-range-btn" id="btn1d" onclick="setPeriod(1)">1D</button>
+                            <button class="time-range-btn active" id="btn5d" onclick="setPeriod(5)">5D</button>
+                            <button class="time-range-btn" id="btn30d" onclick="setPeriod(30)">30D</button>
+                        </div>
+                    </div>
+                    
+                    <div class="days-container" id="daysContainer">
+                        <div class="weekday-boxes" id="weekdayBoxes"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="position" id="position">1 of 502</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-button" id="prevBtn" onclick="previousTicker()">← Previous</button>
+                <button class="nav-button" id="nextBtn" onclick="nextTicker()">Next →</button>
+            </div>
+            
+            <button class="save-button" id="saveBtn" onclick="saveTicker()">💾 Save This Ticker</button>
+        </div>
+
+        <div class="saved-list-container">
+            <div class="saved-list-title">
+                <span>📋 Saved Tickers</span>
+                <div class="button-group">
+                    <button class="open-all-button" id="openAllBtn" onclick="openAllTabs()" disabled>🚀 Open All in Tabs</button>
+                    <button class="delete-all-button" id="deleteAllBtn" onclick="deleteAllTickers()" disabled>🗑️ Delete All</button>
+                </div>
+            </div>
+            <div id="savedTableContent">
+                <div class="empty-message">No tickers saved yet. Navigate through stocks and click "Save This Ticker" to add them here.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tickers = [
+{"ticker":"NVDA","company":"NVIDIA Corporation","link":"https://stockanalysis.com/stocks/nvda/"},
+{"ticker":"MSFT","company":"Microsoft Corporation","link":"https://stockanalysis.com/stocks/msft/"},
+{"ticker":"AAPL","company":"Apple Inc.","link":"https://stockanalysis.com/stocks/aapl/"},
+{"ticker":"GOOGL","company":"Alphabet Inc.","link":"https://stockanalysis.com/stocks/googl/"},
+{"ticker":"GOOG","company":"Alphabet Inc.","link":"https://stockanalysis.com/stocks/goog/"},
+{"ticker":"AMZN","company":"Amazon.com, Inc.","link":"https://stockanalysis.com/stocks/amzn/"},
+{"ticker":"META","company":"Meta Platforms, Inc.","link":"https://stockanalysis.com/stocks/meta/"},
+{"ticker":"AVGO","company":"Broadcom Inc.","link":"https://stockanalysis.com/stocks/avgo/"},
+{"ticker":"TSLA","company":"Tesla, Inc.","link":"https://stockanalysis.com/stocks/tsla/"},
+{"ticker":"BRK.B","company":"Berkshire Hathaway Inc.","link":"https://stockanalysis.com/stocks/brk.b/"},
+{"ticker":"JPM","company":"JPMorgan Chase & Co.","link":"https://stockanalysis.com/stocks/jpm/"},
+{"ticker":"WMT","company":"Walmart Inc.","link":"https://stockanalysis.com/stocks/wmt/"},
+{"ticker":"ORCL","company":"Oracle Corporation","link":"https://stockanalysis.com/stocks/orcl/"},
+{"ticker":"V","company":"Visa Inc.","link":"https://stockanalysis.com/stocks/v/"},
+{"ticker":"LLY","company":"Eli Lilly and Company","link":"https://stockanalysis.com/stocks/lly/"},
+{"ticker":"MA","company":"Mastercard Incorporated","link":"https://stockanalysis.com/stocks/ma/"},
+{"ticker":"NFLX","company":"Netflix, Inc.","link":"https://stockanalysis.com/stocks/nflx/"},
+{"ticker":"XOM","company":"Exxon Mobil Corporation","link":"https://stockanalysis.com/stocks/xom/"},
+{"ticker":"COST","company":"Costco Wholesale Corporation","link":"https://stockanalysis.com/stocks/cost/"},
+{"ticker":"JNJ","company":"Johnson & Johnson","link":"https://stockanalysis.com/stocks/jnj/"},
+{"ticker":"PLTR","company":"Palantir Technologies Inc.","link":"https://stockanalysis.com/stocks/pltr/"},
+{"ticker":"HD","company":"The Home Depot, Inc.","link":"https://stockanalysis.com/stocks/hd/"},
+{"ticker":"ABBV","company":"AbbVie Inc.","link":"https://stockanalysis.com/stocks/abbv/"},
+{"ticker":"PG","company":"The Procter & Gamble Company","link":"https://stockanalysis.com/stocks/pg/"},
+{"ticker":"BAC","company":"Bank of America Corporation","link":"https://stockanalysis.com/stocks/bac/"},
+{"ticker":"CVX","company":"Chevron Corporation","link":"https://stockanalysis.com/stocks/cvx/"},
+{"ticker":"KO","company":"The Coca-Cola Company","link":"https://stockanalysis.com/stocks/ko/"},
+{"ticker":"AMD","company":"Advanced Micro Devices, Inc.","link":"https://stockanalysis.com/stocks/amd/"},
+{"ticker":"TMUS","company":"T-Mobile US, Inc.","link":"https://stockanalysis.com/stocks/tmus/"},
+{"ticker":"GE","company":"General Electric Company","link":"https://stockanalysis.com/stocks/ge/"},
+{"ticker":"UNH","company":"UnitedHealth Group Incorporated","link":"https://stockanalysis.com/stocks/unh/"},
+{"ticker":"CSCO","company":"Cisco Systems, Inc.","link":"https://stockanalysis.com/stocks/csco/"},
+{"ticker":"PM","company":"Philip Morris International Inc.","link":"https://stockanalysis.com/stocks/pm/"},
+{"ticker":"WFC","company":"Wells Fargo & Company","link":"https://stockanalysis.com/stocks/wfc/"},
+{"ticker":"CRM","company":"Salesforce, Inc.","link":"https://stockanalysis.com/stocks/crm/"},
+{"ticker":"MS","company":"Morgan Stanley","link":"https://stockanalysis.com/stocks/ms/"},
+{"ticker":"ABT","company":"Abbott Laboratories","link":"https://stockanalysis.com/stocks/abt/"},
+{"ticker":"LIN","company":"Linde plc","link":"https://stockanalysis.com/stocks/lin/"},
+{"ticker":"IBM","company":"International Business Machines Corporation","link":"https://stockanalysis.com/stocks/ibm/"},
+{"ticker":"MCD","company":"McDonald's Corporation","link":"https://stockanalysis.com/stocks/mcd/"},
+{"ticker":"AXP","company":"American Express Company","link":"https://stockanalysis.com/stocks/axp/"},
+{"ticker":"BX","company":"Blackstone Inc.","link":"https://stockanalysis.com/stocks/bx/"},
+{"ticker":"GS","company":"The Goldman Sachs Group, Inc.","link":"https://stockanalysis.com/stocks/gs/"},
+{"ticker":"MRK","company":"Merck & Co., Inc.","link":"https://stockanalysis.com/stocks/mrk/"},
+{"ticker":"DIS","company":"The Walt Disney Company","link":"https://stockanalysis.com/stocks/dis/"},
+{"ticker":"T","company":"AT&T Inc.","link":"https://stockanalysis.com/stocks/t/"},
+{"ticker":"RTX","company":"RTX Corporation","link":"https://stockanalysis.com/stocks/rtx/"},
+{"ticker":"PEP","company":"PepsiCo, Inc.","link":"https://stockanalysis.com/stocks/pep/"},
+{"ticker":"INTU","company":"Intuit Inc.","link":"https://stockanalysis.com/stocks/intu/"},
+{"ticker":"UBER","company":"Uber Technologies, Inc.","link":"https://stockanalysis.com/stocks/uber/"},
+{"ticker":"CAT","company":"Caterpillar Inc.","link":"https://stockanalysis.com/stocks/cat/"},
+{"ticker":"VZ","company":"Verizon Communications Inc.","link":"https://stockanalysis.com/stocks/vz/"},
+{"ticker":"TMO","company":"Thermo Fisher Scientific Inc.","link":"https://stockanalysis.com/stocks/tmo/"},
+{"ticker":"NOW","company":"ServiceNow, Inc.","link":"https://stockanalysis.com/stocks/now/"},
+{"ticker":"BA","company":"The Boeing Company","link":"https://stockanalysis.com/stocks/ba/"},
+{"ticker":"BKNG","company":"Booking Holdings Inc.","link":"https://stockanalysis.com/stocks/bkng/"},
+{"ticker":"BLK","company":"BlackRock, Inc.","link":"https://stockanalysis.com/stocks/blk/"},
+{"ticker":"TXN","company":"Texas Instruments Incorporated","link":"https://stockanalysis.com/stocks/txn/"},
+{"ticker":"SCHW","company":"The Charles Schwab Corporation","link":"https://stockanalysis.com/stocks/schw/"},
+{"ticker":"C","company":"Citigroup Inc.","link":"https://stockanalysis.com/stocks/c/"},
+{"ticker":"ISRG","company":"Intuitive Surgical, Inc.","link":"https://stockanalysis.com/stocks/isrg/"},
+{"ticker":"ANET","company":"Arista Networks Inc","link":"https://stockanalysis.com/stocks/anet/"},
+{"ticker":"SPGI","company":"S&P Global Inc.","link":"https://stockanalysis.com/stocks/spgi/"},
+{"ticker":"QCOM","company":"QUALCOMM Incorporated","link":"https://stockanalysis.com/stocks/qcom/"},
+{"ticker":"GEV","company":"GE Vernova Inc.","link":"https://stockanalysis.com/stocks/gev/"},
+{"ticker":"AMGN","company":"Amgen Inc.","link":"https://stockanalysis.com/stocks/amgn/"},
+{"ticker":"ACN","company":"Accenture plc","link":"https://stockanalysis.com/stocks/acn/"},
+{"ticker":"NEE","company":"NextEra Energy, Inc.","link":"https://stockanalysis.com/stocks/nee/"},
+{"ticker":"BSX","company":"Boston Scientific Corporation","link":"https://stockanalysis.com/stocks/bsx/"},
+{"ticker":"DHR","company":"Danaher Corporation","link":"https://stockanalysis.com/stocks/dhr/"},
+{"ticker":"ADBE","company":"Adobe Inc.","link":"https://stockanalysis.com/stocks/adbe/"},
+{"ticker":"TJX","company":"The TJX Companies, Inc.","link":"https://stockanalysis.com/stocks/tjx/"},
+{"ticker":"GILD","company":"Gilead Sciences, Inc.","link":"https://stockanalysis.com/stocks/gild/"},
+{"ticker":"SYK","company":"Stryker Corporation","link":"https://stockanalysis.com/stocks/syk/"},
+{"ticker":"PGR","company":"The Progressive Corporation","link":"https://stockanalysis.com/stocks/pgr/"},
+{"ticker":"PFE","company":"Pfizer Inc.","link":"https://stockanalysis.com/stocks/pfe/"},
+{"ticker":"LOW","company":"Lowe's Companies, Inc.","link":"https://stockanalysis.com/stocks/low/"},
+{"ticker":"COF","company":"Capital One Financial Corporation","link":"https://stockanalysis.com/stocks/cof/"},
+{"ticker":"HON","company":"Honeywell International Inc.","link":"https://stockanalysis.com/stocks/hon/"},
+{"ticker":"ETN","company":"Eaton Corporation plc","link":"https://stockanalysis.com/stocks/etn/"},
+{"ticker":"MU","company":"Micron Technology, Inc.","link":"https://stockanalysis.com/stocks/mu/"},
+{"ticker":"APH","company":"Amphenol Corporation","link":"https://stockanalysis.com/stocks/aph/"},
+{"ticker":"DE","company":"Deere & Company","link":"https://stockanalysis.com/stocks/de/"},
+{"ticker":"UNP","company":"Union Pacific Corporation","link":"https://stockanalysis.com/stocks/unp/"},
+{"ticker":"AMAT","company":"Applied Materials, Inc.","link":"https://stockanalysis.com/stocks/amat/"},
+{"ticker":"KKR","company":"KKR & Co. Inc.","link":"https://stockanalysis.com/stocks/kkr/"},
+{"ticker":"LRCX","company":"Lam Research Corporation","link":"https://stockanalysis.com/stocks/lrcx/"},
+{"ticker":"CMCSA","company":"Comcast Corporation","link":"https://stockanalysis.com/stocks/cmcsa/"},
+{"ticker":"ADP","company":"Automatic Data Processing, Inc.","link":"https://stockanalysis.com/stocks/adp/"},
+{"ticker":"COP","company":"ConocoPhillips","link":"https://stockanalysis.com/stocks/cop/"},
+{"ticker":"MDT","company":"Medtronic plc","link":"https://stockanalysis.com/stocks/mdt/"},
+{"ticker":"PANW","company":"Palo Alto Networks, Inc.","link":"https://stockanalysis.com/stocks/panw/"},
+{"ticker":"KLAC","company":"KLA Corporation","link":"https://stockanalysis.com/stocks/klac/"},
+{"ticker":"ADI","company":"Analog Devices, Inc.","link":"https://stockanalysis.com/stocks/adi/"},
+{"ticker":"SNPS","company":"Synopsys, Inc.","link":"https://stockanalysis.com/stocks/snps/"},
+{"ticker":"NKE","company":"NIKE, Inc.","link":"https://stockanalysis.com/stocks/nke/"},
+{"ticker":"MO","company":"Altria Group, Inc.","link":"https://stockanalysis.com/stocks/mo/"},
+{"ticker":"INTC","company":"Intel Corporation","link":"https://stockanalysis.com/stocks/intc/"},
+{"ticker":"CB","company":"Chubb Limited","link":"https://stockanalysis.com/stocks/cb/"},
+{"ticker":"WELL","company":"Welltower Inc.","link":"https://stockanalysis.com/stocks/well/"},
+{"ticker":"CRWD","company":"CrowdStrike Holdings, Inc.","link":"https://stockanalysis.com/stocks/crwd/"},
+{"ticker":"DASH","company":"DoorDash, Inc.","link":"https://stockanalysis.com/stocks/dash/"},
+{"ticker":"ICE","company":"Intercontinental Exchange, Inc.","link":"https://stockanalysis.com/stocks/ice/"},
+{"ticker":"SO","company":"The Southern Company","link":"https://stockanalysis.com/stocks/so/"},
+{"ticker":"SBUX","company":"Starbucks Corporation","link":"https://stockanalysis.com/stocks/sbux/"},
+{"ticker":"LMT","company":"Lockheed Martin Corporation","link":"https://stockanalysis.com/stocks/lmt/"},
+{"ticker":"MMC","company":"Marsh & McLennan Companies, Inc.","link":"https://stockanalysis.com/stocks/mmc/"},
+{"ticker":"VRTX","company":"Vertex Pharmaceuticals Incorporated","link":"https://stockanalysis.com/stocks/vrtx/"},
+{"ticker":"CEG","company":"Constellation Energy Corporation","link":"https://stockanalysis.com/stocks/ceg/"},
+{"ticker":"PLD","company":"Prologis, Inc.","link":"https://stockanalysis.com/stocks/pld/"},
+{"ticker":"CME","company":"CME Group Inc.","link":"https://stockanalysis.com/stocks/cme/"},
+{"ticker":"BMY","company":"Bristol-Myers Squibb Company","link":"https://stockanalysis.com/stocks/bmy/"},
+{"ticker":"AMT","company":"American Tower Corporation","link":"https://stockanalysis.com/stocks/amt/"},
+{"ticker":"CDNS","company":"Cadence Design Systems, Inc.","link":"https://stockanalysis.com/stocks/cdns/"},
+{"ticker":"DUK","company":"Duke Energy Corporation","link":"https://stockanalysis.com/stocks/duk/"},
+{"ticker":"TT","company":"Trane Technologies plc","link":"https://stockanalysis.com/stocks/tt/"},
+{"ticker":"DELL","company":"Dell Technologies Inc.","link":"https://stockanalysis.com/stocks/dell/"},
+{"ticker":"PH","company":"Parker-Hannifin Corporation","link":"https://stockanalysis.com/stocks/ph/"},
+{"ticker":"MCO","company":"Moody's Corporation","link":"https://stockanalysis.com/stocks/mco/"},
+{"ticker":"HCA","company":"HCA Healthcare, Inc.","link":"https://stockanalysis.com/stocks/hca/"},
+{"ticker":"WM","company":"Waste Management, Inc.","link":"https://stockanalysis.com/stocks/wm/"},
+{"ticker":"SHW","company":"The Sherwin-Williams Company","link":"https://stockanalysis.com/stocks/shw/"},
+{"ticker":"CVS","company":"CVS Health Corporation","link":"https://stockanalysis.com/stocks/cvs/"},
+{"ticker":"CTAS","company":"Cintas Corporation","link":"https://stockanalysis.com/stocks/ctas/"},
+{"ticker":"ORLY","company":"O'Reilly Automotive, Inc.","link":"https://stockanalysis.com/stocks/orly/"},
+{"ticker":"RCL","company":"Royal Caribbean Cruises Ltd.","link":"https://stockanalysis.com/stocks/rcl/"},
+{"ticker":"GD","company":"General Dynamics Corporation","link":"https://stockanalysis.com/stocks/gd/"},
+{"ticker":"MCK","company":"McKesson Corporation","link":"https://stockanalysis.com/stocks/mck/"},
+{"ticker":"NOC","company":"Northrop Grumman Corporation","link":"https://stockanalysis.com/stocks/noc/"},
+{"ticker":"COIN","company":"Coinbase Global, Inc.","link":"https://stockanalysis.com/stocks/coin/"},
+{"ticker":"MMM","company":"3M Company","link":"https://stockanalysis.com/stocks/mmm/"},
+{"ticker":"MDLZ","company":"Mondelez International, Inc.","link":"https://stockanalysis.com/stocks/mdlz/"},
+{"ticker":"CI","company":"The Cigna Group","link":"https://stockanalysis.com/stocks/ci/"},
+{"ticker":"AON","company":"Aon plc","link":"https://stockanalysis.com/stocks/aon/"},
+{"ticker":"ECL","company":"Ecolab Inc.","link":"https://stockanalysis.com/stocks/ecl/"},
+{"ticker":"APO","company":"Apollo Global Management, Inc.","link":"https://stockanalysis.com/stocks/apo/"},
+{"ticker":"TDG","company":"TransDigm Group Incorporated","link":"https://stockanalysis.com/stocks/tdg/"},
+{"ticker":"EQIX","company":"Equinix, Inc.","link":"https://stockanalysis.com/stocks/eqix/"},
+{"ticker":"ABNB","company":"Airbnb, Inc.","link":"https://stockanalysis.com/stocks/abnb/"},
+{"ticker":"MSI","company":"Motorola Solutions, Inc.","link":"https://stockanalysis.com/stocks/msi/"},
+{"ticker":"NEM","company":"Newmont Corporation","link":"https://stockanalysis.com/stocks/nem/"},
+{"ticker":"ITW","company":"Illinois Tool Works Inc.","link":"https://stockanalysis.com/stocks/itw/"},
+{"ticker":"PNC","company":"The PNC Financial Services Group, Inc.","link":"https://stockanalysis.com/stocks/pnc/"},
+{"ticker":"AJG","company":"Arthur J. Gallagher & Co.","link":"https://stockanalysis.com/stocks/ajg/"},
+{"ticker":"UPS","company":"United Parcel Service, Inc.","link":"https://stockanalysis.com/stocks/ups/"},
+{"ticker":"EMR","company":"Emerson Electric Co.","link":"https://stockanalysis.com/stocks/emr/"},
+{"ticker":"FI","company":"Fiserv, Inc.","link":"https://stockanalysis.com/stocks/fi/"},
+{"ticker":"RSG","company":"Republic Services, Inc.","link":"https://stockanalysis.com/stocks/rsg/"},
+{"ticker":"MAR","company":"Marriott International, Inc.","link":"https://stockanalysis.com/stocks/mar/"},
+{"ticker":"USB","company":"U.S. Bancorp","link":"https://stockanalysis.com/stocks/usb/"},
+{"ticker":"BK","company":"The Bank of New York Mellon Corporation","link":"https://stockanalysis.com/stocks/bk/"},
+{"ticker":"WMB","company":"The Williams Companies, Inc.","link":"https://stockanalysis.com/stocks/wmb/"},
+{"ticker":"ELV","company":"Elevance Health, Inc.","link":"https://stockanalysis.com/stocks/elv/"},
+{"ticker":"HWM","company":"Howmet Aerospace Inc.","link":"https://stockanalysis.com/stocks/hwm/"},
+{"ticker":"CL","company":"Colgate-Palmolive Company","link":"https://stockanalysis.com/stocks/cl/"},
+{"ticker":"ZTS","company":"Zoetis Inc.","link":"https://stockanalysis.com/stocks/zts/"},
+{"ticker":"JCI","company":"Johnson Controls International plc","link":"https://stockanalysis.com/stocks/jci/"},
+{"ticker":"CSX","company":"CSX Corporation","link":"https://stockanalysis.com/stocks/csx/"},
+{"ticker":"AZO","company":"AutoZone, Inc.","link":"https://stockanalysis.com/stocks/azo/"},
+{"ticker":"VST","company":"Vistra Corp.","link":"https://stockanalysis.com/stocks/vst/"},
+{"ticker":"PYPL","company":"PayPal Holdings, Inc.","link":"https://stockanalysis.com/stocks/pypl/"},
+{"ticker":"EOG","company":"EOG Resources, Inc.","link":"https://stockanalysis.com/stocks/eog/"},
+{"ticker":"SPG","company":"Simon Property Group, Inc.","link":"https://stockanalysis.com/stocks/spg/"},
+{"ticker":"APD","company":"Air Products and Chemicals, Inc.","link":"https://stockanalysis.com/stocks/apd/"},
+{"ticker":"HLT","company":"Hilton Worldwide Holdings Inc.","link":"https://stockanalysis.com/stocks/hlt/"},
+{"ticker":"MNST","company":"Monster Beverage Corporation","link":"https://stockanalysis.com/stocks/mnst/"},
+{"ticker":"NSC","company":"Norfolk Southern Corporation","link":"https://stockanalysis.com/stocks/nsc/"},
+{"ticker":"ADSK","company":"Autodesk, Inc.","link":"https://stockanalysis.com/stocks/adsk/"},
+{"ticker":"FCX","company":"Freeport-McMoRan Inc.","link":"https://stockanalysis.com/stocks/fcx/"},
+{"ticker":"FTNT","company":"Fortinet, Inc.","link":"https://stockanalysis.com/stocks/ftnt/"},
+{"ticker":"TEL","company":"TE Connectivity plc","link":"https://stockanalysis.com/stocks/tel/"},
+{"ticker":"WDAY","company":"Workday, Inc.","link":"https://stockanalysis.com/stocks/wday/"},
+{"ticker":"TRV","company":"The Travelers Companies, Inc.","link":"https://stockanalysis.com/stocks/trv/"},
+{"ticker":"AEP","company":"American Electric Power Company, Inc.","link":"https://stockanalysis.com/stocks/aep/"},
+{"ticker":"REGN","company":"Regeneron Pharmaceuticals, Inc.","link":"https://stockanalysis.com/stocks/regn/"},
+{"ticker":"AXON","company":"Axon Enterprise, Inc.","link":"https://stockanalysis.com/stocks/axon/"},
+{"ticker":"KMI","company":"Kinder Morgan, Inc.","link":"https://stockanalysis.com/stocks/kmi/"},
+{"ticker":"URI","company":"United Rentals, Inc.","link":"https://stockanalysis.com/stocks/uri/"},
+{"ticker":"CMG","company":"Chipotle Mexican Grill, Inc.","link":"https://stockanalysis.com/stocks/cmg/"},
+{"ticker":"DLR","company":"Digital Realty Trust, Inc.","link":"https://stockanalysis.com/stocks/dlr/"},
+{"ticker":"TFC","company":"Truist Financial Corporation","link":"https://stockanalysis.com/stocks/tfc/"},
+{"ticker":"NXPI","company":"NXP Semiconductors N.V.","link":"https://stockanalysis.com/stocks/nxpi/"},
+{"ticker":"COR","company":"Cencora, Inc.","link":"https://stockanalysis.com/stocks/cor/"},
+{"ticker":"PWR","company":"Quanta Services, Inc.","link":"https://stockanalysis.com/stocks/pwr/"},
+{"ticker":"ROP","company":"Roper Technologies, Inc.","link":"https://stockanalysis.com/stocks/rop/"},
+{"ticker":"AFL","company":"Aflac Incorporated","link":"https://stockanalysis.com/stocks/afl/"},
+{"ticker":"BDX","company":"Becton, Dickinson and Company","link":"https://stockanalysis.com/stocks/bdx/"},
+{"ticker":"FAST","company":"Fastenal Company","link":"https://stockanalysis.com/stocks/fast/"},
+{"ticker":"GLW","company":"Corning Incorporated","link":"https://stockanalysis.com/stocks/glw/"},
+{"ticker":"CARR","company":"Carrier Global Corporation","link":"https://stockanalysis.com/stocks/carr/"},
+{"ticker":"CMI","company":"Cummins Inc.","link":"https://stockanalysis.com/stocks/cmi/"},
+{"ticker":"ALL","company":"The Allstate Corporation","link":"https://stockanalysis.com/stocks/all/"},
+{"ticker":"NDAQ","company":"Nasdaq, Inc.","link":"https://stockanalysis.com/stocks/ndaq/"},
+{"ticker":"FDX","company":"FedEx Corporation","link":"https://stockanalysis.com/stocks/fdx/"},
+{"ticker":"GM","company":"General Motors Company","link":"https://stockanalysis.com/stocks/gm/"},
+{"ticker":"O","company":"Realty Income Corporation","link":"https://stockanalysis.com/stocks/o/"},
+{"ticker":"SRE","company":"Sempra","link":"https://stockanalysis.com/stocks/sre/"},
+{"ticker":"IDXX","company":"IDEXX Laboratories, Inc.","link":"https://stockanalysis.com/stocks/idxx/"},
+{"ticker":"D","company":"Dominion Energy, Inc.","link":"https://stockanalysis.com/stocks/d/"},
+{"ticker":"MET","company":"MetLife, Inc.","link":"https://stockanalysis.com/stocks/met/"},
+{"ticker":"PCAR","company":"PACCAR Inc","link":"https://stockanalysis.com/stocks/pcar/"},
+{"ticker":"LHX","company":"L3Harris Technologies, Inc.","link":"https://stockanalysis.com/stocks/lhx/"},
+{"ticker":"PSX","company":"Phillips 66","link":"https://stockanalysis.com/stocks/psx/"},
+{"ticker":"PSA","company":"Public Storage","link":"https://stockanalysis.com/stocks/psa/"},
+{"ticker":"PAYX","company":"Paychex, Inc.","link":"https://stockanalysis.com/stocks/payx/"},
+{"ticker":"DHI","company":"D.R. Horton, Inc.","link":"https://stockanalysis.com/stocks/dhi/"},
+{"ticker":"SLB","company":"Schlumberger Limited","link":"https://stockanalysis.com/stocks/slb/"},
+{"ticker":"MPC","company":"Marathon Petroleum Corporation","link":"https://stockanalysis.com/stocks/mpc/"},
+{"ticker":"CTVA","company":"Corteva, Inc.","link":"https://stockanalysis.com/stocks/ctva/"},
+{"ticker":"ROST","company":"Ross Stores, Inc.","link":"https://stockanalysis.com/stocks/rost/"},
+{"ticker":"AMP","company":"Ameriprise Financial, Inc.","link":"https://stockanalysis.com/stocks/amp/"},
+{"ticker":"KDP","company":"Keurig Dr Pepper Inc.","link":"https://stockanalysis.com/stocks/kdp/"},
+{"ticker":"CBRE","company":"CBRE Group, Inc.","link":"https://stockanalysis.com/stocks/cbre/"},
+{"ticker":"OKE","company":"ONEOK, Inc.","link":"https://stockanalysis.com/stocks/oke/"},
+{"ticker":"TGT","company":"Target Corporation","link":"https://stockanalysis.com/stocks/tgt/"},
+{"ticker":"GWW","company":"W.W. Grainger, Inc.","link":"https://stockanalysis.com/stocks/gww/"},
+{"ticker":"XYZ","company":"Block, Inc.","link":"https://stockanalysis.com/stocks/xyz/"},
+{"ticker":"KR","company":"The Kroger Co.","link":"https://stockanalysis.com/stocks/kr/"},
+{"ticker":"EBAY","company":"eBay Inc.","link":"https://stockanalysis.com/stocks/ebay/"},
+{"ticker":"EW","company":"Edwards Lifesciences Corporation","link":"https://stockanalysis.com/stocks/ew/"},
+{"ticker":"F","company":"Ford Motor Company","link":"https://stockanalysis.com/stocks/f/"},
+{"ticker":"CPRT","company":"Copart, Inc.","link":"https://stockanalysis.com/stocks/cprt/"},
+{"ticker":"EXC","company":"Exelon Corporation","link":"https://stockanalysis.com/stocks/exc/"},
+{"ticker":"GRMN","company":"Garmin Ltd.","link":"https://stockanalysis.com/stocks/grmn/"},
+{"ticker":"CCI","company":"Crown Castle Inc.","link":"https://stockanalysis.com/stocks/cci/"},
+{"ticker":"AIG","company":"American International Group, Inc.","link":"https://stockanalysis.com/stocks/aig/"},
+{"ticker":"DDOG","company":"Datadog, Inc.","link":"https://stockanalysis.com/stocks/ddog/"},
+{"ticker":"KMB","company":"Kimberly-Clark Corporation","link":"https://stockanalysis.com/stocks/kmb/"},
+{"ticker":"OXY","company":"Occidental Petroleum Corporation","link":"https://stockanalysis.com/stocks/oxy/"},
+{"ticker":"EA","company":"Electronic Arts Inc.","link":"https://stockanalysis.com/stocks/ea/"},
+{"ticker":"MSCI","company":"MSCI Inc.","link":"https://stockanalysis.com/stocks/msci/"},
+{"ticker":"TTWO","company":"Take-Two Interactive Software, Inc.","link":"https://stockanalysis.com/stocks/ttwo/"},
+{"ticker":"BKR","company":"Baker Hughes Company","link":"https://stockanalysis.com/stocks/bkr/"},
+{"ticker":"PEG","company":"Public Service Enterprise Group Incorporated","link":"https://stockanalysis.com/stocks/peg/"},
+{"ticker":"XEL","company":"Xcel Energy Inc.","link":"https://stockanalysis.com/stocks/xel/"},
+{"ticker":"VLO","company":"Valero Energy Corporation","link":"https://stockanalysis.com/stocks/vlo/"},
+{"ticker":"AME","company":"AMETEK, Inc.","link":"https://stockanalysis.com/stocks/ame/"},
+{"ticker":"RMD","company":"ResMed Inc.","link":"https://stockanalysis.com/stocks/rmd/"},
+{"ticker":"YUM","company":"Yum! Brands, Inc.","link":"https://stockanalysis.com/stocks/yum/"},
+{"ticker":"FANG","company":"Diamondback Energy, Inc.","link":"https://stockanalysis.com/stocks/fang/"},
+{"ticker":"CHTR","company":"Charter Communications, Inc.","link":"https://stockanalysis.com/stocks/chtr/"},
+{"ticker":"KVUE","company":"Kenvue Inc.","link":"https://stockanalysis.com/stocks/kvue/"},
+{"ticker":"ETR","company":"Entergy Corporation","link":"https://stockanalysis.com/stocks/etr/"},
+{"ticker":"MPWR","company":"Monolithic Power Systems, Inc.","link":"https://stockanalysis.com/stocks/mpwr/"},
+{"ticker":"CCL","company":"Carnival Corporation & plc","link":"https://stockanalysis.com/stocks/ccl/"},
+{"ticker":"DAL","company":"Delta Air Lines, Inc.","link":"https://stockanalysis.com/stocks/dal/"},
+{"ticker":"ROK","company":"Rockwell Automation, Inc.","link":"https://stockanalysis.com/stocks/rok/"},
+{"ticker":"VMC","company":"Vulcan Materials Company","link":"https://stockanalysis.com/stocks/vmc/"},
+{"ticker":"SYY","company":"Sysco Corporation","link":"https://stockanalysis.com/stocks/syy/"},
+{"ticker":"CSGP","company":"CoStar Group, Inc.","link":"https://stockanalysis.com/stocks/csgp/"},
+{"ticker":"PRU","company":"Prudential Financial, Inc.","link":"https://stockanalysis.com/stocks/pru/"},
+{"ticker":"TKO","company":"TKO Group Holdings, Inc.","link":"https://stockanalysis.com/stocks/tko/"},
+{"ticker":"VRSK","company":"Verisk Analytics, Inc.","link":"https://stockanalysis.com/stocks/vrsk/"},
+{"ticker":"LYV","company":"Live Nation Entertainment, Inc.","link":"https://stockanalysis.com/stocks/lyv/"},
+{"ticker":"FIS","company":"Fidelity National Information Services, Inc.","link":"https://stockanalysis.com/stocks/fis/"},
+{"ticker":"LVS","company":"Las Vegas Sands Corp.","link":"https://stockanalysis.com/stocks/lvs/"},
+{"ticker":"HIG","company":"The Hartford Insurance Group, Inc.","link":"https://stockanalysis.com/stocks/hig/"},
+{"ticker":"MLM","company":"Martin Marietta Materials, Inc.","link":"https://stockanalysis.com/stocks/mlm/"},
+{"ticker":"ED","company":"Consolidated Edison, Inc.","link":"https://stockanalysis.com/stocks/ed/"},
+{"ticker":"HSY","company":"The Hershey Company","link":"https://stockanalysis.com/stocks/hsy/"},
+{"ticker":"CAH","company":"Cardinal Health, Inc.","link":"https://stockanalysis.com/stocks/cah/"},
+{"ticker":"MCHP","company":"Microchip Technology Incorporated","link":"https://stockanalysis.com/stocks/mchp/"},
+{"ticker":"TRGP","company":"Targa Resources Corp.","link":"https://stockanalysis.com/stocks/trgp/"},
+{"ticker":"HUM","company":"Humana Inc.","link":"https://stockanalysis.com/stocks/hum/"},
+{"ticker":"VICI","company":"VICI Properties Inc.","link":"https://stockanalysis.com/stocks/vici/"},
+{"ticker":"LEN","company":"Lennar Corporation","link":"https://stockanalysis.com/stocks/len/"},
+{"ticker":"WEC","company":"WEC Energy Group, Inc.","link":"https://stockanalysis.com/stocks/wec/"},
+{"ticker":"XYL","company":"Xylem Inc.","link":"https://stockanalysis.com/stocks/xyl/"},
+{"ticker":"OTIS","company":"Otis Worldwide Corporation","link":"https://stockanalysis.com/stocks/otis/"},
+{"ticker":"CTSH","company":"Cognizant Technology Solutions Corporation","link":"https://stockanalysis.com/stocks/ctsh/"},
+{"ticker":"ACGL","company":"Arch Capital Group Ltd.","link":"https://stockanalysis.com/stocks/acgl/"},
+{"ticker":"A","company":"Agilent Technologies, Inc.","link":"https://stockanalysis.com/stocks/a/"},
+{"ticker":"GEHC","company":"GE HealthCare Technologies Inc.","link":"https://stockanalysis.com/stocks/gehc/"},
+{"ticker":"NUE","company":"Nucor Corporation","link":"https://stockanalysis.com/stocks/nue/"},
+{"ticker":"PCG","company":"PG&E Corporation","link":"https://stockanalysis.com/stocks/pcg/"},
+{"ticker":"EQT","company":"EQT Corporation","link":"https://stockanalysis.com/stocks/eqt/"},
+{"ticker":"EL","company":"The Estée Lauder Companies Inc.","link":"https://stockanalysis.com/stocks/el/"},
+{"ticker":"STX","company":"Seagate Technology Holdings plc","link":"https://stockanalysis.com/stocks/stx/"},
+{"ticker":"UAL","company":"United Airlines Holdings, Inc.","link":"https://stockanalysis.com/stocks/ual/"},
+{"ticker":"KHC","company":"The Kraft Heinz Company","link":"https://stockanalysis.com/stocks/khc/"},
+{"ticker":"IQV","company":"IQVIA Holdings Inc.","link":"https://stockanalysis.com/stocks/iqv/"},
+{"ticker":"RJF","company":"Raymond James Financial, Inc.","link":"https://stockanalysis.com/stocks/rjf/"},
+{"ticker":"WAB","company":"Westinghouse Air Brake Technologies Corporation","link":"https://stockanalysis.com/stocks/wab/"},
+{"ticker":"WTW","company":"Willis Towers Watson Public Limited Company","link":"https://stockanalysis.com/stocks/wtw/"},
+{"ticker":"FICO","company":"Fair Isaac Corporation","link":"https://stockanalysis.com/stocks/fico/"},
+{"ticker":"ODFL","company":"Old Dominion Freight Line, Inc.","link":"https://stockanalysis.com/stocks/odfl/"},
+{"ticker":"TSCO","company":"Tractor Supply Company","link":"https://stockanalysis.com/stocks/tsco/"},
+{"ticker":"DXCM","company":"DexCom, Inc.","link":"https://stockanalysis.com/stocks/dxcm/"},
+{"ticker":"BRO","company":"Brown & Brown, Inc.","link":"https://stockanalysis.com/stocks/bro/"},
+{"ticker":"STT","company":"State Street Corporation","link":"https://stockanalysis.com/stocks/stt/"},
+{"ticker":"IR","company":"Ingersoll Rand Inc.","link":"https://stockanalysis.com/stocks/ir/"},
+{"ticker":"VTR","company":"Ventas, Inc.","link":"https://stockanalysis.com/stocks/vtr/"},
+{"ticker":"DD","company":"DuPont de Nemours, Inc.","link":"https://stockanalysis.com/stocks/dd/"},
+{"ticker":"EFX","company":"Equifax Inc.","link":"https://stockanalysis.com/stocks/efx/"},
+{"ticker":"BR","company":"Broadridge Financial Solutions, Inc.","link":"https://stockanalysis.com/stocks/br/"},
+{"ticker":"EXR","company":"Extra Space Storage Inc.","link":"https://stockanalysis.com/stocks/exr/"},
+{"ticker":"MTB","company":"M&T Bank Corporation","link":"https://stockanalysis.com/stocks/mtb/"},
+{"ticker":"STZ","company":"Constellation Brands, Inc.","link":"https://stockanalysis.com/stocks/stz/"},
+{"ticker":"WBD","company":"Warner Bros. Discovery, Inc.","link":"https://stockanalysis.com/stocks/wbd/"},
+{"ticker":"AWK","company":"American Water Works Company, Inc.","link":"https://stockanalysis.com/stocks/awk/"},
+{"ticker":"NRG","company":"NRG Energy, Inc.","link":"https://stockanalysis.com/stocks/nrg/"},
+{"ticker":"DTE","company":"DTE Energy Company","link":"https://stockanalysis.com/stocks/dte/"},
+{"ticker":"ADM","company":"Archer-Daniels-Midland Company","link":"https://stockanalysis.com/stocks/adm/"},
+{"ticker":"FITB","company":"Fifth Third Bancorp","link":"https://stockanalysis.com/stocks/fitb/"},
+{"ticker":"KEYS","company":"Keysight Technologies, Inc.","link":"https://stockanalysis.com/stocks/keys/"},
+{"ticker":"K","company":"Kellanova","link":"https://stockanalysis.com/stocks/k/"},
+{"ticker":"ROL","company":"Rollins, Inc.","link":"https://stockanalysis.com/stocks/rol/"},
+{"ticker":"HPE","company":"Hewlett Packard Enterprise Company","link":"https://stockanalysis.com/stocks/hpe/"},
+{"ticker":"AEE","company":"Ameren Corporation","link":"https://stockanalysis.com/stocks/aee/"},
+{"ticker":"MTD","company":"Mettler-Toledo International Inc.","link":"https://stockanalysis.com/stocks/mtd/"},
+{"ticker":"AVB","company":"AvalonBay Communities, Inc.","link":"https://stockanalysis.com/stocks/avb/"},
+{"ticker":"PPL","company":"PPL Corporation","link":"https://stockanalysis.com/stocks/ppl/"},
+{"ticker":"IRM","company":"Iron Mountain Incorporated","link":"https://stockanalysis.com/stocks/irm/"},
+{"ticker":"WRB","company":"W. R. Berkley Corporation","link":"https://stockanalysis.com/stocks/wrb/"},
+{"ticker":"SMCI","company":"Super Micro Computer, Inc.","link":"https://stockanalysis.com/stocks/smci/"},
+{"ticker":"ATO","company":"Atmos Energy Corporation","link":"https://stockanalysis.com/stocks/ato/"},
+{"ticker":"VLTO","company":"Veralto Corporation","link":"https://stockanalysis.com/stocks/vlto/"},
+{"ticker":"SYF","company":"Synchrony Financial","link":"https://stockanalysis.com/stocks/syf/"},
+{"ticker":"GIS","company":"General Mills, Inc.","link":"https://stockanalysis.com/stocks/gis/"},
+{"ticker":"FOXA","company":"Fox Corporation","link":"https://stockanalysis.com/stocks/foxa/"},
+{"ticker":"WDC","company":"Western Digital Corporation","link":"https://stockanalysis.com/stocks/wdc/"},
+{"ticker":"CBOE","company":"Cboe Global Markets, Inc.","link":"https://stockanalysis.com/stocks/cboe/"},
+{"ticker":"EXPE","company":"Expedia Group, Inc.","link":"https://stockanalysis.com/stocks/expe/"},
+{"ticker":"PHM","company":"PulteGroup, Inc.","link":"https://stockanalysis.com/stocks/phm/"},
+{"ticker":"TTD","company":"The Trade Desk, Inc.","link":"https://stockanalysis.com/stocks/ttd/"},
+{"ticker":"FOX","company":"Fox Corporation","link":"https://stockanalysis.com/stocks/fox/"},
+{"ticker":"EQR","company":"Equity Residential","link":"https://stockanalysis.com/stocks/eqr/"},
+{"ticker":"VRSN","company":"VeriSign, Inc.","link":"https://stockanalysis.com/stocks/vrsn/"},
+{"ticker":"TDY","company":"Teledyne Technologies Incorporated","link":"https://stockanalysis.com/stocks/tdy/"},
+{"ticker":"PPG","company":"PPG Industries, Inc.","link":"https://stockanalysis.com/stocks/ppg/"},
+{"ticker":"FE","company":"FirstEnergy Corp.","link":"https://stockanalysis.com/stocks/fe/"},
+{"ticker":"HPQ","company":"HP Inc.","link":"https://stockanalysis.com/stocks/hpq/"},
+{"ticker":"WSM","company":"Williams-Sonoma, Inc.","link":"https://stockanalysis.com/stocks/wsm/"},
+{"ticker":"TYL","company":"Tyler Technologies, Inc.","link":"https://stockanalysis.com/stocks/tyl/"},
+{"ticker":"CNP","company":"CenterPoint Energy, Inc.","link":"https://stockanalysis.com/stocks/cnp/"},
+{"ticker":"DG","company":"Dollar General Corporation","link":"https://stockanalysis.com/stocks/dg/"},
+{"ticker":"PTC","company":"PTC Inc.","link":"https://stockanalysis.com/stocks/ptc/"},
+{"ticker":"IP","company":"International Paper Company","link":"https://stockanalysis.com/stocks/ip/"},
+{"ticker":"HBAN","company":"Huntington Bancshares Incorporated","link":"https://stockanalysis.com/stocks/hban/"},
+{"ticker":"DOV","company":"Dover Corporation","link":"https://stockanalysis.com/stocks/dov/"},
+{"ticker":"ES","company":"Eversource Energy","link":"https://stockanalysis.com/stocks/es/"},
+{"ticker":"STE","company":"STERIS plc","link":"https://stockanalysis.com/stocks/ste/"},
+{"ticker":"DRI","company":"Darden Restaurants, Inc.","link":"https://stockanalysis.com/stocks/dri/"},
+{"ticker":"NTRS","company":"Northern Trust Corporation","link":"https://stockanalysis.com/stocks/ntrs/"},
+{"ticker":"LULU","company":"lululemon athletica inc.","link":"https://stockanalysis.com/stocks/lulu/"},
+{"ticker":"CINF","company":"Cincinnati Financial Corporation","link":"https://stockanalysis.com/stocks/cinf/"},
+{"ticker":"SBAC","company":"SBA Communications Corporation","link":"https://stockanalysis.com/stocks/sbac/"},
+{"ticker":"NVR","company":"NVR, Inc.","link":"https://stockanalysis.com/stocks/nvr/"},
+{"ticker":"DLTR","company":"Dollar Tree, Inc.","link":"https://stockanalysis.com/stocks/dltr/"},
+{"ticker":"TROW","company":"T. Rowe Price Group, Inc.","link":"https://stockanalysis.com/stocks/trow/"},
+{"ticker":"ULTA","company":"Ulta Beauty, Inc.","link":"https://stockanalysis.com/stocks/ulta/"},
+{"ticker":"JBL","company":"Jabil Inc.","link":"https://stockanalysis.com/stocks/jbl/"},
+{"ticker":"RF","company":"Regions Financial Corporation","link":"https://stockanalysis.com/stocks/rf/"},
+{"ticker":"HUBB","company":"Hubbell Incorporated","link":"https://stockanalysis.com/stocks/hubb/"},
+{"ticker":"EXE","company":"Expand Energy Corporation","link":"https://stockanalysis.com/stocks/exe/"},
+{"ticker":"LDOS","company":"Leidos Holdings, Inc.","link":"https://stockanalysis.com/stocks/ldos/"},
+{"ticker":"CHD","company":"Church & Dwight Co., Inc.","link":"https://stockanalysis.com/stocks/chd/"},
+{"ticker":"PODD","company":"Insulet Corporation","link":"https://stockanalysis.com/stocks/podd/"},
+{"ticker":"CPAY","company":"Corpay, Inc.","link":"https://stockanalysis.com/stocks/cpay/"},
+{"ticker":"LH","company":"Labcorp Holdings Inc.","link":"https://stockanalysis.com/stocks/lh/"},
+{"ticker":"SW","company":"Smurfit Westrock Plc","link":"https://stockanalysis.com/stocks/sw/"},
+{"ticker":"FSLR","company":"First Solar, Inc.","link":"https://stockanalysis.com/stocks/fslr/"},
+{"ticker":"NTAP","company":"NetApp, Inc.","link":"https://stockanalysis.com/stocks/ntap/"},
+{"ticker":"CMS","company":"CMS Energy Corporation","link":"https://stockanalysis.com/stocks/cms/"},
+{"ticker":"DVN","company":"Devon Energy Corporation","link":"https://stockanalysis.com/stocks/dvn/"},
+{"ticker":"EIX","company":"Edison International","link":"https://stockanalysis.com/stocks/eix/"},
+{"ticker":"CDW","company":"CDW Corporation","link":"https://stockanalysis.com/stocks/cdw/"},
+{"ticker":"GPN","company":"Global Payments Inc.","link":"https://stockanalysis.com/stocks/gpn/"},
+{"ticker":"CFG","company":"Citizens Financial Group, Inc.","link":"https://stockanalysis.com/stocks/cfg/"},
+{"ticker":"LII","company":"Lennox International Inc.","link":"https://stockanalysis.com/stocks/lii/"},
+{"ticker":"ON","company":"ON Semiconductor Corporation","link":"https://stockanalysis.com/stocks/on/"},
+{"ticker":"TPR","company":"Tapestry, Inc.","link":"https://stockanalysis.com/stocks/tpr/"},
+{"ticker":"TPL","company":"Texas Pacific Land Corporation","link":"https://stockanalysis.com/stocks/tpl/"},
+{"ticker":"GDDY","company":"GoDaddy Inc.","link":"https://stockanalysis.com/stocks/gddy/"},
+{"ticker":"ZBH","company":"Zimmer Biomet Holdings, Inc.","link":"https://stockanalysis.com/stocks/zbh/"},
+{"ticker":"BIIB","company":"Biogen Inc.","link":"https://stockanalysis.com/stocks/biib/"},
+{"ticker":"TSN","company":"Tyson Foods, Inc.","link":"https://stockanalysis.com/stocks/tsn/"},
+{"ticker":"AMCR","company":"Amcor plc","link":"https://stockanalysis.com/stocks/amcr/"},
+{"ticker":"DGX","company":"Quest Diagnostics Incorporated","link":"https://stockanalysis.com/stocks/dgx/"},
+{"ticker":"KEY","company":"KeyCorp","link":"https://stockanalysis.com/stocks/key/"},
+{"ticker":"L","company":"Loews Corporation","link":"https://stockanalysis.com/stocks/l/"},
+{"ticker":"NI","company":"NiSource Inc.","link":"https://stockanalysis.com/stocks/ni/"},
+{"ticker":"TRMB","company":"Trimble Inc.","link":"https://stockanalysis.com/stocks/trmb/"},
+{"ticker":"GEN","company":"Gen Digital Inc.","link":"https://stockanalysis.com/stocks/gen/"},
+{"ticker":"ERIE","company":"Erie Indemnity Company","link":"https://stockanalysis.com/stocks/erie/"},
+{"ticker":"GPC","company":"Genuine Parts Company","link":"https://stockanalysis.com/stocks/gpc/"},
+{"ticker":"STLD","company":"Steel Dynamics, Inc.","link":"https://stockanalysis.com/stocks/stld/"},
+{"ticker":"MKC","company":"McCormick & Company, Incorporated","link":"https://stockanalysis.com/stocks/mkc/"},
+{"ticker":"WY","company":"Weyerhaeuser Company","link":"https://stockanalysis.com/stocks/wy/"},
+{"ticker":"INVH","company":"Invitation Homes Inc.","link":"https://stockanalysis.com/stocks/invh/"},
+{"ticker":"CTRA","company":"Coterra Energy Inc.","link":"https://stockanalysis.com/stocks/ctra/"},
+{"ticker":"IT","company":"Gartner, Inc.","link":"https://stockanalysis.com/stocks/it/"},
+{"ticker":"HAL","company":"Halliburton Company","link":"https://stockanalysis.com/stocks/hal/"},
+{"ticker":"FFIV","company":"F5, Inc.","link":"https://stockanalysis.com/stocks/ffiv/"},
+{"ticker":"WST","company":"West Pharmaceutical Services, Inc.","link":"https://stockanalysis.com/stocks/wst/"},
+{"ticker":"NWS","company":"News Corporation","link":"https://stockanalysis.com/stocks/nws/"},
+{"ticker":"J","company":"Jacobs Solutions Inc.","link":"https://stockanalysis.com/stocks/j/"},
+{"ticker":"RL","company":"Ralph Lauren Corporation","link":"https://stockanalysis.com/stocks/rl/"},
+{"ticker":"TER","company":"Teradyne, Inc.","link":"https://stockanalysis.com/stocks/ter/"},
+{"ticker":"WAT","company":"Waters Corporation","link":"https://stockanalysis.com/stocks/wat/"},
+{"ticker":"PKG","company":"Packaging Corporation of America","link":"https://stockanalysis.com/stocks/pkg/"},
+{"ticker":"PFG","company":"Principal Financial Group, Inc.","link":"https://stockanalysis.com/stocks/pfg/"},
+{"ticker":"PNR","company":"Pentair plc","link":"https://stockanalysis.com/stocks/pnr/"},
+{"ticker":"ESS","company":"Essex Property Trust, Inc.","link":"https://stockanalysis.com/stocks/ess/"},
+{"ticker":"LYB","company":"LyondellBasell Industries N.V.","link":"https://stockanalysis.com/stocks/lyb/"},
+{"ticker":"SNA","company":"Snap-on Incorporated","link":"https://stockanalysis.com/stocks/sna/"},
+{"ticker":"MAA","company":"Mid-America Apartment Communities, Inc.","link":"https://stockanalysis.com/stocks/maa/"},
+{"ticker":"INCY","company":"Incyte Corporation","link":"https://stockanalysis.com/stocks/incy/"},
+{"ticker":"IFF","company":"International Flavors & Fragrances Inc.","link":"https://stockanalysis.com/stocks/iff/"},
+{"ticker":"NWSA","company":"News Corporation","link":"https://stockanalysis.com/stocks/nwsa/"},
+{"ticker":"DOW","company":"Dow Inc.","link":"https://stockanalysis.com/stocks/dow/"},
+{"ticker":"LNT","company":"Alliant Energy Corporation","link":"https://stockanalysis.com/stocks/lnt/"},
+{"ticker":"EVRG","company":"Evergy, Inc.","link":"https://stockanalysis.com/stocks/evrg/"},
+{"ticker":"LUV","company":"Southwest Airlines Co.","link":"https://stockanalysis.com/stocks/luv/"},
+{"ticker":"BG","company":"Bunge Global SA","link":"https://stockanalysis.com/stocks/bg/"},
+{"ticker":"FTV","company":"Fortive Corporation","link":"https://stockanalysis.com/stocks/ftv/"},
+{"ticker":"EXPD","company":"Expeditors International of Washington, Inc.","link":"https://stockanalysis.com/stocks/expd/"},
+{"ticker":"APTV","company":"Aptiv PLC","link":"https://stockanalysis.com/stocks/aptv/"},
+{"ticker":"ZBRA","company":"Zebra Technologies Corporation","link":"https://stockanalysis.com/stocks/zbra/"},
+{"ticker":"HRL","company":"Hormel Foods Corporation","link":"https://stockanalysis.com/stocks/hrl/"},
+{"ticker":"MAS","company":"Masco Corporation","link":"https://stockanalysis.com/stocks/mas/"},
+{"ticker":"DECK","company":"Deckers Outdoor Corporation","link":"https://stockanalysis.com/stocks/deck/"},
+{"ticker":"DPZ","company":"Domino's Pizza, Inc.","link":"https://stockanalysis.com/stocks/dpz/"},
+{"ticker":"BLDR","company":"Builders FirstSource, Inc.","link":"https://stockanalysis.com/stocks/bldr/"},
+{"ticker":"HOLX","company":"Hologic, Inc.","link":"https://stockanalysis.com/stocks/holx/"},
+{"ticker":"BBY","company":"Best Buy Co., Inc.","link":"https://stockanalysis.com/stocks/bby/"},
+{"ticker":"CLX","company":"The Clorox Company","link":"https://stockanalysis.com/stocks/clx/"},
+{"ticker":"OMC","company":"Omnicom Group Inc.","link":"https://stockanalysis.com/stocks/omc/"},
+{"ticker":"COO","company":"The Cooper Companies, Inc.","link":"https://stockanalysis.com/stocks/coo/"},
+{"ticker":"BALL","company":"Ball Corporation","link":"https://stockanalysis.com/stocks/ball/"},
+{"ticker":"KIM","company":"Kimco Realty Corporation","link":"https://stockanalysis.com/stocks/kim/"},
+{"ticker":"ALLE","company":"Allegion plc","link":"https://stockanalysis.com/stocks/alle/"},
+{"ticker":"CHRW","company":"C.H. Robinson Worldwide, Inc.","link":"https://stockanalysis.com/stocks/chrw/"},
+{"ticker":"BF.B","company":"Brown-Forman Corporation","link":"https://stockanalysis.com/stocks/bf.b/"},
+{"ticker":"TXT","company":"Textron Inc.","link":"https://stockanalysis.com/stocks/txt/"},
+{"ticker":"CNC","company":"Centene Corporation","link":"https://stockanalysis.com/stocks/cnc/"},
+{"ticker":"UDR","company":"UDR, Inc.","link":"https://stockanalysis.com/stocks/udr/"},
+{"ticker":"FDS","company":"FactSet Research Systems Inc.","link":"https://stockanalysis.com/stocks/fds/"},
+{"ticker":"EG","company":"Everest Group, Ltd.","link":"https://stockanalysis.com/stocks/eg/"},
+{"ticker":"CF","company":"CF Industries Holdings, Inc.","link":"https://stockanalysis.com/stocks/cf/"},
+{"ticker":"JBHT","company":"J.B. Hunt Transport Services, Inc.","link":"https://stockanalysis.com/stocks/jbht/"},
+{"ticker":"AVY","company":"Avery Dennison Corporation","link":"https://stockanalysis.com/stocks/avy/"},
+{"ticker":"BEN","company":"Franklin Resources, Inc.","link":"https://stockanalysis.com/stocks/ben/"},
+{"ticker":"ARE","company":"Alexandria Real Estate Equities, Inc.","link":"https://stockanalysis.com/stocks/are/"},
+{"ticker":"REG","company":"Regency Centers Corporation","link":"https://stockanalysis.com/stocks/reg/"},
+{"ticker":"SOLV","company":"Solventum Corporation","link":"https://stockanalysis.com/stocks/solv/"},
+{"ticker":"VTRS","company":"Viatris Inc.","link":"https://stockanalysis.com/stocks/vtrs/"},
+{"ticker":"IEX","company":"IDEX Corporation","link":"https://stockanalysis.com/stocks/iex/"},
+{"ticker":"BAX","company":"Baxter International Inc.","link":"https://stockanalysis.com/stocks/bax/"},
+{"ticker":"DOC","company":"Healthpeak Properties, Inc.","link":"https://stockanalysis.com/stocks/doc/"},
+{"ticker":"PAYC","company":"Paycom Software, Inc.","link":"https://stockanalysis.com/stocks/payc/"},
+{"ticker":"NDSN","company":"Nordson Corporation","link":"https://stockanalysis.com/stocks/ndsn/"},
+{"ticker":"POOL","company":"Pool Corporation","link":"https://stockanalysis.com/stocks/pool/"},
+{"ticker":"GNRC","company":"Generac Holdings Inc.","link":"https://stockanalysis.com/stocks/gnrc/"},
+{"ticker":"SJM","company":"The J. M. Smucker Company","link":"https://stockanalysis.com/stocks/sjm/"},
+{"ticker":"JKHY","company":"Jack Henry & Associates, Inc.","link":"https://stockanalysis.com/stocks/jkhy/"},
+{"ticker":"CPT","company":"Camden Property Trust","link":"https://stockanalysis.com/stocks/cpt/"},
+{"ticker":"BXP","company":"BXP, Inc.","link":"https://stockanalysis.com/stocks/bxp/"},
+{"ticker":"SWK","company":"Stanley Black & Decker, Inc.","link":"https://stockanalysis.com/stocks/swk/"},
+{"ticker":"HAS","company":"Hasbro, Inc.","link":"https://stockanalysis.com/stocks/has/"},
+{"ticker":"WYNN","company":"Wynn Resorts, Limited","link":"https://stockanalysis.com/stocks/wynn/"},
+{"ticker":"UHS","company":"Universal Health Services, Inc.","link":"https://stockanalysis.com/stocks/uhs/"},
+{"ticker":"GL","company":"Globe Life Inc.","link":"https://stockanalysis.com/stocks/gl/"},
+{"ticker":"HST","company":"Host Hotels & Resorts, Inc.","link":"https://stockanalysis.com/stocks/hst/"},
+{"ticker":"MRNA","company":"Moderna, Inc.","link":"https://stockanalysis.com/stocks/mrna/"},
+{"ticker":"SWKS","company":"Skyworks Solutions, Inc.","link":"https://stockanalysis.com/stocks/swks/"},
+{"ticker":"NCLH","company":"Norwegian Cruise Line Holdings Ltd.","link":"https://stockanalysis.com/stocks/nclh/"},
+{"ticker":"PNW","company":"Pinnacle West Capital Corporation","link":"https://stockanalysis.com/stocks/pnw/"},
+{"ticker":"AIZ","company":"Assurant, Inc.","link":"https://stockanalysis.com/stocks/aiz/"},
+{"ticker":"AKAM","company":"Akamai Technologies, Inc.","link":"https://stockanalysis.com/stocks/akam/"},
+{"ticker":"RVTY","company":"Revvity, Inc.","link":"https://stockanalysis.com/stocks/rvty/"},
+{"ticker":"HII","company":"Huntington Ingalls Industries, Inc.","link":"https://stockanalysis.com/stocks/hii/"},
+{"ticker":"ALGN","company":"Align Technology, Inc.","link":"https://stockanalysis.com/stocks/algn/"},
+{"ticker":"WBA","company":"Walgreens Boots Alliance, Inc.","link":"https://stockanalysis.com/stocks/wba/"},
+{"ticker":"MOS","company":"The Mosaic Company","link":"https://stockanalysis.com/stocks/mos/"},
+{"ticker":"TAP","company":"Molson Coors Beverage Company","link":"https://stockanalysis.com/stocks/tap/"},
+{"ticker":"AOS","company":"A. O. Smith Corporation","link":"https://stockanalysis.com/stocks/aos/"},
+{"ticker":"MGM","company":"MGM Resorts International","link":"https://stockanalysis.com/stocks/mgm/"},
+{"ticker":"CPB","company":"The Campbell's Company","link":"https://stockanalysis.com/stocks/cpb/"},
+{"ticker":"ALB","company":"Albemarle Corporation","link":"https://stockanalysis.com/stocks/alb/"},
+{"ticker":"DVA","company":"DaVita Inc.","link":"https://stockanalysis.com/stocks/dva/"},
+{"ticker":"IPG","company":"The Interpublic Group of Companies, Inc.","link":"https://stockanalysis.com/stocks/ipg/"},
+{"ticker":"AES","company":"The AES Corporation","link":"https://stockanalysis.com/stocks/aes/"},
+{"ticker":"IVZ","company":"Invesco Ltd.","link":"https://stockanalysis.com/stocks/ivz/"},
+{"ticker":"MTCH","company":"Match Group, Inc.","link":"https://stockanalysis.com/stocks/mtch/"},
+{"ticker":"CAG","company":"Conagra Brands, Inc.","link":"https://stockanalysis.com/stocks/cag/"},
+{"ticker":"MOH","company":"Molina Healthcare, Inc.","link":"https://stockanalysis.com/stocks/moh/"},
+{"ticker":"EPAM","company":"EPAM Systems, Inc.","link":"https://stockanalysis.com/stocks/epam/"},
+{"ticker":"KMX","company":"CarMax, Inc.","link":"https://stockanalysis.com/stocks/kmx/"},
+{"ticker":"TECH","company":"Bio-Techne Corporation","link":"https://stockanalysis.com/stocks/tech/"},
+{"ticker":"DAY","company":"Dayforce Inc.","link":"https://stockanalysis.com/stocks/day/"},
+{"ticker":"HSIC","company":"Henry Schein, Inc.","link":"https://stockanalysis.com/stocks/hsic/"},
+{"ticker":"FRT","company":"Federal Realty Investment Trust","link":"https://stockanalysis.com/stocks/frt/"},
+{"ticker":"LKQ","company":"LKQ Corporation","link":"https://stockanalysis.com/stocks/lkq/"},
+{"ticker":"MHK","company":"Mohawk Industries, Inc.","link":"https://stockanalysis.com/stocks/mhk/"},
+{"ticker":"CRL","company":"Charles River Laboratories International, Inc.","link":"https://stockanalysis.com/stocks/crl/"},
+{"ticker":"LW","company":"Lamb Weston Holdings, Inc.","link":"https://stockanalysis.com/stocks/lw/"},
+{"ticker":"EMN","company":"Eastman Chemical Company","link":"https://stockanalysis.com/stocks/emn/"},
+{"ticker":"APA","company":"APA Corporation","link":"https://stockanalysis.com/stocks/apa/"},
+{"ticker":"MKTX","company":"MarketAxess Holdings Inc.","link":"https://stockanalysis.com/stocks/mktx/"},
+{"ticker":"CZR","company":"Caesars Entertainment, Inc.","link":"https://stockanalysis.com/stocks/czr/"},
+{"ticker":"ENPH","company":"Enphase Energy, Inc.","link":"https://stockanalysis.com/stocks/enph/"}
+];
+        
+        let currentIndex = 0;
+        let savedTickers = [];
+        let customTime = "22:59";
+        let customDate = new Date();
+        let selectedPeriod = 5; // Default to 5D
+        let selectedSpecificDay = null; // Track if a specific day is selected
+        let showPercentage = true; // Track percentage visibility
+        
+        // Toggle percentage visibility
+        function togglePercentage() {
+            showPercentage = !showPercentage;
+            const percentageElement = document.getElementById('percentage');
+            const toggleBtn = document.getElementById('togglePercentageBtn');
+            
+            if (showPercentage) {
+                percentageElement.classList.remove('hidden');
+                toggleBtn.textContent = 'Hide %';
+            } else {
+                percentageElement.classList.add('hidden');
+                toggleBtn.textContent = 'Show %';
+            }
+        }
+        
+        // Set the period and update display
+        function setPeriod(days) {
+            selectedPeriod = days;
+            selectedSpecificDay = null; // Clear specific day selection when changing period
+            
+            // Update button states
+            document.getElementById('btn1d').classList.remove('active');
+            document.getElementById('btn5d').classList.remove('active');
+            document.getElementById('btn30d').classList.remove('active');
+            document.getElementById(`btn${days}d`).classList.add('active');
+            
+            // Show/hide days container
+            const daysContainer = document.getElementById('daysContainer');
+            if (days === 1) {
+                daysContainer.style.display = 'none';
+            } else {
+                daysContainer.style.display = 'block';
+                // Refresh the weekday boxes with the new period
+                populateWeekdayBoxes();
+            }
+            
+            // Update date display
+            updateDateDisplay();
+        }
+        
+        // Get last N weekdays (excluding weekends)
+        function getLastWeekdays(count) {
+            const weekdays = [];
+            const today = new Date();
+            let currentDate = new Date(today);
+            
+            while (weekdays.length < count) {
+                // Check if it's a weekday (Monday = 1, Friday = 5)
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    weekdays.push(new Date(currentDate));
+                }
+                currentDate.setDate(currentDate.getDate() - 1);
+            }
+            
+            return weekdays;
+        }
+        
+        // Populate weekday boxes based on selected period
+        function populateWeekdayBoxes() {
+            const weekdays = getLastWeekdays(selectedPeriod);
+            const container = document.getElementById('weekdayBoxes');
+            container.innerHTML = '';
+            
+            weekdays.forEach((date, index) => {
+                const box = document.createElement('div');
+                box.className = 'weekday-box active'; // Always blue as part of the group
+                
+                // Add small class for 30D period
+                if (selectedPeriod === 30) {
+                    box.classList.add('small');
+                }
+                
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                
+                box.innerHTML = `
+                    <div class="weekday-name">${dayNames[date.getDay()]}</div>
+                    <div class="weekday-date">${monthNames[date.getMonth()]} ${date.getDate()}</div>
+                `;
+                
+                box.onclick = () => {
+                    selectedSpecificDay = new Date(date);
+                    customDate = new Date(date);
+                };
+                
+                container.appendChild(box);
+            });
+        }
+        
+        // Initialize time and date display
+        function initializeDateTime() {
+            document.getElementById('currentTime').textContent = customTime;
+            updateDateDisplay();
+            populateWeekdayBoxes();
+        }
+        
+        function updateDateDisplay() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            
+            // Show actual date for 1D, infinity for multi-day periods
+            if (selectedPeriod === 1) {
+                document.getElementById('currentDate').textContent = customDate.toLocaleDateString('en-US', options);
+            } else {
+                document.getElementById('currentDate').textContent = '∞';
+            }
+        }
+        
+        // Make time editable
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeElement = document.getElementById('currentTime');
+            const dateElement = document.getElementById('currentDate');
+            
+            timeElement.addEventListener('click', function() {
+                const currentValue = customTime;
+                const input = document.createElement('input');
+                input.type = 'time';
+                input.className = 'edit-input';
+                input.value = currentValue;
+                input.style.fontSize = '1.3rem';
+                input.style.fontWeight = '600';
+                
+                timeElement.textContent = '';
+                timeElement.appendChild(input);
+                input.focus();
+                
+                function saveTime() {
+                    if (input.value) {
+                        customTime = input.value;
+                    }
+                    timeElement.textContent = customTime;
+                }
+                
+                input.addEventListener('blur', saveTime);
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        saveTime();
+                    }
+                });
+            });
+            
+            dateElement.addEventListener('click', function() {
+                const input = document.createElement('input');
+                input.type = 'date';
+                input.className = 'edit-input';
+                const year = customDate.getFullYear();
+                const month = String(customDate.getMonth() + 1).padStart(2, '0');
+                const day = String(customDate.getDate()).padStart(2, '0');
+                input.value = `${year}-${month}-${day}`;
+                input.style.fontSize = '0.95rem';
+                
+                dateElement.textContent = '';
+                dateElement.appendChild(input);
+                input.focus();
+                
+                function saveDate() {
+                    if (input.value) {
+                        customDate = new Date(input.value);
+                    }
+                    updateDateDisplay();
+                    populateWeekdayBoxes(); // Refresh weekday boxes
+                }
+                
+                input.addEventListener('blur', saveDate);
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        saveDate();
+                    }
+                });
+            });
+        });
+        
+        function updateDisplay() {
+            const ticker = tickers[currentIndex];
+            document.getElementById('ticker').textContent = ticker.ticker;
+            document.getElementById('companyName').textContent = ticker.company;
+            document.getElementById('position').textContent = `${currentIndex + 1} of ${tickers.length}`;
+            
+            // Update progress bar
+            const progress = ((currentIndex + 1) / tickers.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === tickers.length - 1;
+            
+            // Update save button state
+            updateSaveButton();
+        }
+        
+        function updateSaveButton() {
+            const saveBtn = document.getElementById('saveBtn');
+            const currentTicker = tickers[currentIndex].ticker;
+            const isSaved = savedTickers.some(t => t.ticker === currentTicker);
+            
+            if (isSaved) {
+                saveBtn.textContent = '✓ Saved';
+                saveBtn.classList.add('saved');
+                saveBtn.disabled = true;
+            } else {
+                saveBtn.textContent = '💾 Save This Ticker';
+                saveBtn.classList.remove('saved');
+                saveBtn.disabled = false;
+            }
+        }
+        
+        function saveTicker() {
+            const ticker = tickers[currentIndex];
+            const isSaved = savedTickers.some(t => t.ticker === ticker.ticker);
+            
+            if (!isSaved) {
+                savedTickers.push(ticker);
+                updateSaveButton();
+                renderSavedTable();
+            }
+        }
+        
+        function removeTicker(tickerSymbol) {
+            savedTickers = savedTickers.filter(t => t.ticker !== tickerSymbol);
+            updateSaveButton();
+            renderSavedTable();
+        }
+        
+        function openAllTabs() {
+            if (savedTickers.length === 0) {
+                alert('No tickers saved yet!');
+                return;
+            }
+            
+            // Open tabs with small delays to avoid popup blocker
+            savedTickers.forEach((ticker, index) => {
+                setTimeout(() => {
+                    window.open(ticker.link, '_blank');
+                }, index * 100);
+            });
+        }
+        
+        function deleteAllTickers() {
+            if (savedTickers.length === 0) {
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete all ${savedTickers.length} saved tickers?`)) {
+                savedTickers = [];
+                updateSaveButton();
+                renderSavedTable();
+            }
+        }
+        
+        function renderSavedTable() {
+            const content = document.getElementById('savedTableContent');
+            const openAllBtn = document.getElementById('openAllBtn');
+            const deleteAllBtn = document.getElementById('deleteAllBtn');
+            
+            if (savedTickers.length === 0) {
+                content.innerHTML = '<div class="empty-message">No tickers saved yet. Navigate through stocks and click "Save This Ticker" to add them here.</div>';
+                openAllBtn.disabled = true;
+                deleteAllBtn.disabled = true;
+                return;
+            }
+            
+            openAllBtn.disabled = false;
+            deleteAllBtn.disabled = false;
+            
+            const tableHTML = `
+                <table class="saved-table">
+                    <thead>
+                        <tr>
+                            <th>Ticker</th>
+                            <th>Company</th>
+                            <th>Link</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${savedTickers.map(ticker => `
+                            <tr>
+                                <td class="table-ticker">${ticker.ticker}</td>
+                                <td class="table-company">${ticker.company}</td>
+                                <td><a href="${ticker.link}" target="_blank" class="table-link">View →</a></td>
+                                <td><button class="table-remove" onclick="removeTicker('${ticker.ticker}')">Remove</button></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            content.innerHTML = tableHTML;
+        }
+        
+        function nextTicker() {
+            if (currentIndex < tickers.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            }
+        }
+        
+        function previousTicker() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                nextTicker();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                previousTicker();
+            }
+        });
+        
+        // Initialize display
+        updateDisplay();
+        initializeDateTime();
+        renderSavedTable();
+    </script>
+</body>
+</html>

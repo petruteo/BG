@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polarizer Dial Control</title>
+    <style>
+        /* Global styles and Resets */
+        :root {
+            --bg-color: #f0f2f5;
+            --surface-color: #ffffff;
+            --primary-color: #14b8a6; /* Teal color */
+            --primary-hover-color: #0d9488; /* Darker Teal for hover */
+            --secondary-color: #6b7280; /* Medium Gray for +/- buttons */
+            --secondary-hover-color: #4b5563; /* Darker Gray for hover */
+            --text-color: #333333;
+            --border-color: #ced4da;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --disabled-color: #e9ecef;
+            --disabled-text-color: #6c757d;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100%; 
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            overflow-x: hidden;
+            padding: 20px; 
+        }
+
+        /* App Container */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: clamp(15px, 3vw, 20px); 
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            width: 100%; 
+            max-width: 700px; 
+            margin: 0 auto; 
+        }
+
+        /* Controls Sections */
+        .controls-section {
+            display: flex;
+            flex-wrap: wrap; 
+            justify-content: center;
+            align-items: center;
+            gap: 15px; 
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            width: 100%;
+        }
+        
+        .controls-section h3 {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 1em; 
+            color: #555;
+        }
+
+        /* SVG Wrapper */
+        #svg-wrapper {
+            width: 100%; 
+            max-width: 600px; 
+            aspect-ratio: 1 / 1; 
+            height: auto; 
+            position: relative;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden; 
+            cursor: default; 
+            background-color: #fff;
+            margin: 0 auto; 
+        }
+
+        /* SVG Containers (will hold embedded SVGs) */
+        .big-disk-container, .polarizer-instance-container { 
+            position: absolute; 
+            top: 0;
+            left: 0;
+            width: 100%; 
+            height: 100%;
+        }
+        
+        .big-disk-container > svg, .polarizer-instance-container > svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; 
+        }
+
+        .polarizer-instance-container { 
+            transform-origin: 50% 100%; 
+            cursor: grab; 
+            touch-action: none; 
+        }
+        .polarizer-instance-container.active-polarizer:active {
+            cursor: grabbing;
+        }
+        .polarizer-instance-container.frozen-polarizer {
+            cursor: default; 
+            pointer-events: none; 
+        }
+
+
+        /* UI Elements: Buttons, Inputs */
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100px; 
+            text-align: center;
+            flex-shrink: 0; 
+        }
+        
+        button {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            flex-grow: 1; 
+            min-width: 100px; 
+        }
+        button:hover:not(:disabled) {
+            background-color: var(--primary-hover-color);
+        }
+        button:disabled {
+            background-color: var(--disabled-color);
+            color: var(--disabled-text-color);
+            cursor: not-allowed;
+        }
+
+        /* Bulkier arrow buttons and new +/- buttons */
+        #rotate-left-button, #rotate-right-button, #rotate-coarse-minus-button, #rotate-coarse-plus-button {
+            font-size: 2.5rem; 
+            padding: 15px 25px; 
+            min-width: 70px; 
+            line-height: 1; 
+            flex-grow: 0; 
+        }
+        /* Specific color for +/- buttons */
+        #rotate-coarse-minus-button, #rotate-coarse-plus-button {
+            background-color: var(--secondary-color);
+        }
+        #rotate-coarse-minus-button:hover:not(:disabled), #rotate-coarse-plus-button:hover:not(:disabled) {
+            background-color: var(--secondary-hover-color);
+        }
+        #mirror-all-button, #remove-last-polarizer-button { /* Style for the new mirror and remove buttons */
+            background-color: var(--secondary-color);
+        }
+        #mirror-all-button:hover:not(:disabled), #remove-last-polarizer-button:hover:not(:disabled) {
+            background-color: var(--secondary-hover-color);
+        }
+
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+        .control-group > span { 
+            flex-shrink: 0;
+        }
+
+
+        /* Presets */
+        #presets-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
+        }
+        #presets-list button { 
+            background-color: #6c757d;
+            flex-grow: 0; 
+        }
+        #presets-list button:hover:not(:disabled) {
+            background-color: #5a6268;
+        }
+        #presets-list .preset-item { 
+            display: flex;
+            align-items: center;
+        }
+        #presets-list .preset-item button:first-child { 
+             min-width: 80px;
+        }
+         #presets-list .preset-item button.remove-preset { 
+            min-width: auto;
+            padding: 5px 8px;
+            font-size: 0.8em;
+            background-color: #dc3545;
+            margin-left: 5px;
+        }
+
+        /* Dropdown specific styles */
+        .dropdown-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .dropdown-group label {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .dropdown-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            max-width: 200px;
+            text-align: center;
+        }
+
+
+        /* Message Area for errors/notifications */
+        #message-area {
+            min-height: 20px;
+            color: red;
+            font-size: 0.9em;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 10px; 
+            }
+             .controls-section {
+                gap: 10px; 
+                padding: 10px;
+            }
+            .control-group {
+                flex-direction: column; 
+                gap: 10px;
+            }
+            input[type="number"], button { 
+                width: 100%; 
+                max-width: none; 
+            }
+             #rotate-left-button, #rotate-right-button, #rotate-coarse-minus-button, #rotate-coarse-plus-button { 
+                min-width: 100%;
+            }
+            #presets-list .preset-item {
+                width: calc(50% - 4px); 
+                flex-direction: column; 
+            }
+            #presets-list .preset-item button {
+                width: 100%;
+            }
+             #presets-list .preset-item button.remove-preset {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+            .dropdown-group select {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="message-area"></div>
+
+        <div id="svg-wrapper">
+            <div id="big-disk-container" class="big-disk-container"></div>
+            </div>
+        
+        <div class="controls-section">
+            <button id="add-new-polarizer-button">Add New Polarizer</button>
+            <button id="remove-last-polarizer-button">Remove Last Polarizer</button>
+            <button id="mirror-all-button">Mirror All Polarizers</button>
+        </div>
+
+        <div class="controls-section">
+             <h3>Rotate Active Polarizer</h3>
+            <div class="control-group">
+                <button id="rotate-coarse-minus-button" aria-label="Rotate Coarse Minus">-</button>
+                <button id="rotate-left-button" aria-label="Rotate Left">←</button>
+                <input type="number" id="angle-input" value="0" step="0.1" min="0" max="360"> <span>&deg;</span>
+                <button id="rotate-right-button" aria-label="Rotate Right">→</button>
+                <button id="rotate-coarse-plus-button" aria-label="Rotate Coarse Plus">+</button>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <h3>Presets (for Active Polarizer)</h3>
+            <div class="control-group">
+                <button id="add-preset-button">Save Current Angle</button>
+            </div>
+            <div id="presets-list">
+                </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="dropdown-group">
+                <label for="disk-type-select">Background Disk Type:</label>
+                <select id="disk-type-select">
+                    <option value="bigDisk">Big Disk</option>
+                    <option value="liveColours">Live Colours</option>
+                    <option value="bg28">BG28</option>
+                    <option value="360">360</option>
+                    <option value="Ou">Ou</option>
+
+
+                </select>
+            </div>
+        </div>
+
+         <div class="controls-section">
+            <button id="export-svg-button">Export SVG (30.4mm)</button>
+            <button id="share-svg-button">Share SVG</button> 
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // --- Constants --- 
+            const POLARIZER_SIZE_RATIO = 0.35; 
+            const ANGLE_STEP_FINE = 0.1;
+            const ANGLE_STEP_COARSE = 2.0;
+            const EXPORT_SVG_VIEWBOX_UNITS = 120; 
+            const EXPORT_SVG_PHYSICAL_SIZE = "30.4mm"; 
+            const ROTATION_INTERVAL_DELAY = 75; 
+
+            // --- Embedded SVG Content ---
+
+            const embeddedOu = ` 
+           
+
+`.replace(/ /g, ' '); // Replace non-breaking spaces
+
+            const embedded360 = ` 
+
+
+`.replace(/ /g, ' '); // Replace non-breaking spaces
+
+
+            const embeddedBG28 = ` 
+
+`.replace(/ /g, ' '); // Replace non-breaking spaces
+
+            const embeddedLiveColours = ` 
+            <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="67.961mm" height="67.961mm" viewBox="1.602844 226.860672 67.960663 67.960648">
+    <circle transform="matrix(1,0,0,-1,35.583172,260.841003)" style="stroke:#000000;stroke-width:0.050000mm;fill:none" r="33.980328" cx="0" cy="0"/>
+    <path transform="matrix(1.65706,-0.652734,-0.652734,-1.65706,30.406698,247.699692)" style="stroke:#000000;stroke-width:0.028074mm;fill:none" d="M0,5.069097L0,11.149024L0,11.149024L0,5.069098"/>
+    <path transform="matrix(1.393814,1.10869,1.10869,-1.393814,44.620354,249.479675)" style="stroke:#000000;stroke-width:0.028074mm;fill:none" d="M0,4.845807L0,10.928283L0,10.928283L0,4.845807"/>
+    <path transform="matrix(1.156658,1.354272,1.354272,-1.156658,46.938202,251.142883)" style="stroke:#000000;stroke-width:0.028074mm;fill:none" d="M0,4.6122L0,10.694897L0,10.694897L0,4.612201"/>
+    <path transform="matrix(1.878557,5.781603,5.781603,-1.878557,-55.588558,290.464447)" style="stroke:#000000;stroke-width:0.008225mm;fill:none" d="M0,19.578007L0,21.35894L0,21.35894L0,19.578007"/>
+    <path transform="matrix(-0.490906,1.711993,1.711993,0.490906,45.117626,263.574951)" style="stroke:#000000;stroke-width:0.028074mm;fill:none" d="M0,7.430177L0,13.510291L0,13.510291L0,7.430176"/>
+    <path transform="matrix(-1.374252,1.132846,1.132846,1.374252,44.767464,271.982361)" style="stroke:#000000;stroke-width:0.028074mm;fill:none" d="M0,4.893123L0,10.97222L0,10.97222L0,4.893124"/>
+    <path transform="matrix(1.780986,0,0,-1.780986,35.583168,265.79306)" style="stroke:#000000;stroke-width:0.028074mm;fill:none" d="M0,-16.298901L0,-16.298901L0,-10.219479L0,15.780518L0,16.298901L0,16.298901L0,15.780522L0,-10.219479L0,-16.298901"/>
+    <path transform="matrix(-5.831694,-1.562598,-1.562598,5.831694,58.49844,175.319946)" style="stroke:#000000;stroke-width:0.008282mm;fill:none" d="M0,18.499992L0,20.293156L0,20.293156L0,18.499992"/>
+    <path transform="matrix(-4.315801,-4.3158,-4.3158,4.315801,88.664658,207.759384)" style="stroke:#000000;stroke-width:0.008192mm;fill:none" d="M0,16.092741L0,17.866722L0,17.866722L0,16.092741"/>
+    <path transform="matrix(-0.324559,-1.751163,-1.751163,0.324559,23.031967,263.167236)" style="stroke:#000000;stroke-width:0.028074mm;fill:none" d="M0,5.831046L0,11.912141L0,11.912141L0,5.831048"/>
+    <path transform="matrix(1.987556,-5.177763,-5.177763,-1.987556,103.705368,286.99057)" style="stroke:#000000;stroke-width:0.009015mm;fill:none" d="M0,17.331303L0,19.283531L0,19.283531L0,17.331303"/>
+    <path transform="matrix(0.549913,0,0,-0.549913,-80.448517,430.7854)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M216,364.003418L215.993164,364.003418L215.967773,364.51416C215.706055,367.06308,213.558899,369.001312,210.996582,369C208.236755,369.000671,205.999725,366.763245,206,364.003418L206.006836,363.868164L206.006836,352.820313L216,352.820313L216,364.003418z"/>
+    <path transform="matrix(-0.010943,0,0,-0.010943,39.721287,237.669022)" style="stroke:#000000;stroke-width:4.569307mm;fill:none" d="M347.352417,400.831055C346.371918,398.998962,344.827362,395.924988,343.920074,394C338.588013,382.686859,321.393646,373,306.644653,373L300.5,373L300.5,265L300.5,157L306.74527,157L312.990509,157L313.24527,258.613708L313.5,360.227417L320.809387,362.083618C324.829559,363.104553,330.431122,365.190857,333.257294,366.71991C339.201477,369.935913,348.621063,378.331085,352.099304,383.512848C353.813141,386.06604,355.072235,386.971436,356.5,386.677338C357.600006,386.450775,379.353607,376.946777,404.841309,365.557343C430.329041,354.167938,451.314362,344.995728,451.475342,345.174652C452.362457,346.160767,456.203735,356.129608,455.837646,356.495667C455.503723,356.82962,355.748688,401.430054,350.317596,403.673645C349.667267,403.942291,348.332947,402.663116,347.352417,400.831055z"/>
+    <path transform="matrix(0.549913,0,0,-1.708577,-78.798782,764.360474)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M208,314C208,313,208,312.875,208,313"/>
+    <path transform="matrix(0.549913,0,0,-0.549913,-78.79879,402.394379)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.549913,0,0,-0.549913,-78.79879,402.001465)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.549913,0,0,-0.549913,-78.79879,401.608521)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.549913,0,0,-0.549913,-78.79879,401.215607)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.549913,0,0,-0.549913,-78.79879,400.822693)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.549913,0,0,-0.549913,-78.79879,400.429749)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.549913,0,0,-0.549913,-78.79879,400.036804)" style="stroke:#000000;stroke-width:0.090923mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+</svg>
+
+            `.replace(/ /g, ' '); // Replace non-breaking spaces
+
+            const embeddedBigDiskSVGString = `
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="41.624mm"
+   height="41.624mm"
+   version="1.1"
+   viewBox="3.188 -79.062 41.624 41.624"
+   id="svg11"
+   sodipodi:docname="big disk polarizer4.svg"
+   inkscape:version="1.3 (0e150ed, 2023-07-21)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs11" />
+  <sodipodi:namedview
+     id="namedview11"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="6.0005445"
+     inkscape:cx="58.661343"
+     inkscape:cy="125.40529"
+     inkscape:window-width="1728"
+     inkscape:window-height="1080"
+     inkscape:window-x="0"
+     inkscape:window-y="37"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg11" />
+  <circle
+     transform="scale(1,-1)"
+     r="20.812"
+     stroke-width="0.05mm"
+     id="circle1"
+     cx="24"
+     cy="58.25"
+     style="fill:none;stroke:#000000" />
+  <g
+     stroke-width="0.050527mm"
+     id="g10"
+     style="fill:none;stroke:#000000">
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="M 4.697,-495.17 H 4.69378 l -0.011955,0.24048 c -0.12324,1.2003 -1.1343,2.113 -2.3409,2.1124 -1.2996,3.1e-4 -2.353,-1.0533 -2.3529,-2.3529 l 0.003219,-0.0637 v -5.2024 h 4.7058 v 5.2661 z"
+       id="path1" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m 2.6314,-497.45 c 0.00919,-0.0172 0.02366,-0.046 0.032161,-0.064 0.049962,-0.10602 0.21107,-0.19678 0.34927,-0.19678 h 0.057576 v -1.012 -1.012 H 3.011888 2.95337 l -0.00239,0.95212 -0.00239,0.95215 -0.068489,0.0174 c -0.03767,0.01 -0.090156,0.0291 -0.11664,0.0435 -0.055697,0.0301 -0.14396,0.1088 -0.17655,0.15735 -0.016058,0.0239 -0.027856,0.0324 -0.041234,0.0297 -0.010307,-0.002 -0.21414,-0.0912 -0.45296,-0.19791 -0.23882,-0.10672 -0.43546,-0.19266 -0.43696,-0.19098 -0.00831,0.009 -0.044305,0.10263 -0.040875,0.10608 0.00313,0.003 0.93784,0.42102 0.98873,0.44205 0.00609,0.003 0.018596,-0.009 0.027784,-0.0266 z"
+       id="path2" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m 2.3425,-492.81 v -1.4205"
+       id="path3" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m -0.012024,-497.16 c 4.709,-0.0154 4.709,0 4.709,0"
+       id="path4" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m -0.012024,-496.82 c 4.709,-0.0154 4.709,0 4.709,0"
+       id="path5" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m -0.012024,-496.49 c 4.709,-0.0154 4.709,0 4.709,0"
+       id="path6" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m -0.012024,-496.15 c 4.709,-0.0154 4.709,0 4.709,0"
+       id="path7" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m -0.012024,-495.81 c 4.709,-0.0154 4.709,0 4.709,0"
+       id="path8" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m -0.012024,-495.48 c 4.709,-0.0154 4.709,0 4.709,0"
+       id="path9" />
+    <path
+       transform="matrix(1,0,0,-0.98958,21.658,-566.38)"
+       d="m -0.012024,-495.14 c 4.709,-0.0154 4.709,0 4.709,0"
+       id="path10" />
+  </g>
+  <path
+     d="m 24.06614,-71.166 v 33.68389"
+     stroke-width="0.0806687mm"
+     id="path11"
+     style="fill:none;stroke:#000000" />
+</svg>
+
+
+            `.replace(/ /g, ' '); // Replace non-breaking spaces
+
+            const embeddedPolarizerSVGString = `
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="4.709mm" height="21.077mm" viewBox="118.645256 246.419403 4.709473 21.077057">
+    <path transform="matrix(0.470947,0,0,-0.470947,21.630072,420.199066)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M216,364.003418L215.993164,364.003418L215.967773,364.51416C215.706055,367.06308,213.558899,369.001312,210.996582,369C208.236755,369.000671,205.999725,366.763245,206,364.003418L206.006836,363.868164L206.006836,352.820313L216,352.820313L216,364.003418z"/>
+    <path transform="matrix(-0.009371,0,0,-0.009371,124.543915,254.813538)" style="stroke:#000000;stroke-width:5.335461mm;fill:none" d="M347.352417,400.831055C346.371918,398.998962,344.827362,395.924988,343.920074,394C338.588013,382.686859,321.393646,373,306.644653,373L300.5,373L300.5,265L300.5,157L306.74527,157L312.990509,157L313.24527,258.613708L313.5,360.227417L320.809387,362.083618C324.829559,363.104553,330.431122,365.190857,333.257294,366.71991C339.201477,369.935913,348.621063,378.331085,352.099304,383.512848C353.813141,386.06604,355.072235,386.971436,356.5,386.677338C357.600006,386.450775,379.353607,376.946777,404.841309,365.557343C430.329041,354.167938,451.314362,344.995728,451.475342,345.174652C452.362457,346.160767,456.203735,356.129608,455.837646,356.495667C455.503723,356.82962,355.748688,401.430054,350.317596,403.673645C349.667267,403.942291,348.332947,402.663116,347.352417,400.831055z"/>
+    <path transform="matrix(0.470947,0,0,-1.420605,23.042912,692.489258)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M208,314C208,313,208,312.875,208,313"/>
+    <path transform="matrix(0.470947,0,0,-0.470947,23.042913,395.884888)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.470947,0,0,-0.470947,23.042913,395.54837)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.470947,0,0,-0.470947,23.042913,395.211884)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.470947,0,0,-0.470947,23.042913,394.875366)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.470947,0,0,-0.470947,23.042913,394.538879)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.470947,0,0,-0.470947,23.042913,394.202362)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.470947,0,0,-0.470947,23.042913,393.865875)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M203,308.145752C213,308.113098,213,308.145752,213,308.145752"/>
+    <path transform="matrix(0.470947,0,0,-12.94176,23.042908,4317.751953)" style="stroke:#000000;stroke-width:0.106169mm;fill:none" d="M208,314C208,313,208,312.875,208,313"/>
+</svg>
+            `.replace(/ /g, ' '); // Replace non-breaking spaces
+
+            // --- DOM Elements ---
+            const svgWrapper = document.getElementById('svg-wrapper');
+            const bigDiskContainer = document.getElementById('big-disk-container'); 
+            let activePolarizerContainer = null; 
+            const messageArea = document.getElementById('message-area');
+            
+            const angleInput = document.getElementById('angle-input');
+            const rotateLeftButton = document.getElementById('rotate-left-button');
+            const rotateRightButton = document.getElementById('rotate-right-button');
+            const rotateCoarseMinusButton = document.getElementById('rotate-coarse-minus-button'); 
+            const rotateCoarsePlusButton = document.getElementById('rotate-coarse-plus-button');   
+            
+            const exportSvgButton = document.getElementById('export-svg-button');
+            const shareSvgButton = document.getElementById('share-svg-button'); 
+            const addNewPolarizerButton = document.getElementById('add-new-polarizer-button');
+            const mirrorAllButton = document.getElementById('mirror-all-button'); 
+            const removeLastPolarizerButton = document.getElementById('remove-last-polarizer-button'); 
+            
+            const addPresetButton = document.getElementById('add-preset-button');
+            const presetsListContainer = document.getElementById('presets-list');
+            const diskTypeSelect = document.getElementById('disk-type-select'); // New dropdown
+
+            // --- State Variables ---
+            let polarizers = []; 
+            let activePolarizerIndex = -1; 
+            let nextPolarizerId = 0; 
+            let allPolarizersMirrored = false; 
+            let currentBigDiskSVG = embeddedBigDiskSVGString; // Keep track of the current SVG content
+            
+            let isDragging = false;
+            let dragStartPointerAngleOffset = 0; 
+            let initialPolarizerAngleOnDragStart = 0;
+            let dragUpdatePending = false; 
+            let lastDragAngle = 0; 
+
+            let presets = [];
+            const MAX_PRESETS = 5;
+            let rotationInterval = null; 
+
+
+            // --- Helper Functions ---
+            function displayMessage(message, isError = false) {
+                messageArea.textContent = message;
+                messageArea.style.color = isError ? 'red' : 'green';
+                if (message) {
+                    setTimeout(() => messageArea.textContent = '', 3000); 
+                }
+            }
+
+            function normalizeAngle(angle) {
+                let newAngle = angle % 360;
+                if (newAngle < 0) {
+                    newAngle += 360;
+                }
+                return Math.round(newAngle * 10) / 10;
+            }
+            
+            function updateAllPolarizersVisuals() {
+                polarizers.forEach(pol => {
+                    const displayAngle = allPolarizersMirrored ? normalizeAngle(-pol.intendedAngle) : pol.intendedAngle;
+                    const polContainer = pol.element;
+                    
+                    const polWidth = pol.currentWidth; 
+                    const polHeight = pol.currentHeight;
+                    const pivotOffsetX = polWidth * 0.5;
+                    const pivotOffsetY = polHeight * 1.0;
+
+                    polContainer.style.left = (pol.pivotX - pivotOffsetX) + 'px';
+                    polContainer.style.top = (pol.pivotY - pivotOffsetY) + 'px';
+                    polContainer.style.transform = `rotate(${displayAngle}deg)`;
+
+                    const svgEl = polContainer.querySelector('svg');
+                    if (svgEl) {
+                        svgEl.style.transform = ""; 
+                    }
+                });
+                 if (activePolarizerIndex !== -1 && polarizers[activePolarizerIndex]) { 
+                    angleInput.value = polarizers[activePolarizerIndex].intendedAngle.toFixed(1);
+                }
+            }
+
+
+            function updateActivePolarizerVisuals() {
+                if (activePolarizerIndex === -1 || !polarizers[activePolarizerIndex]) return;
+
+                const currentPolarizer = polarizers[activePolarizerIndex];
+                const polContainer = currentPolarizer.element;
+                
+                const displayAngle = allPolarizersMirrored ? normalizeAngle(-currentPolarizer.intendedAngle) : currentPolarizer.intendedAngle;
+
+                const polWidth = currentPolarizer.currentWidth; 
+                const polHeight = currentPolarizer.currentHeight;
+                
+                const pivotOffsetX = polWidth * 0.5;
+                const pivotOffsetY = polHeight * 1.0;
+
+                polContainer.style.left = (currentPolarizer.pivotX - pivotOffsetX) + 'px';
+                polContainer.style.top = (currentPolarizer.pivotY - pivotOffsetY) + 'px';
+                polContainer.style.transform = `rotate(${displayAngle}deg)`;
+                
+                const svgEl = polContainer.querySelector('svg');
+                 if (svgEl) {
+                    svgEl.style.transform = ""; 
+                }
+
+                angleInput.value = currentPolarizer.intendedAngle.toFixed(1);
+            }
+            
+            function setAngle(newAngle, updateInput = true) {
+                if (activePolarizerIndex === -1 || !polarizers[activePolarizerIndex]) return;
+                
+                const activePol = polarizers[activePolarizerIndex];
+                activePol.intendedAngle = normalizeAngle(newAngle); 
+
+                if (updateInput) {
+                    angleInput.value = activePol.intendedAngle.toFixed(1);
+                }
+                updateActivePolarizerVisuals(); 
+            }
+
+            function setPolarizerSizeAndPosition(polarizerObj) {
+                const wrapperWidth = svgWrapper.offsetWidth; 
+                const wrapperHeight = svgWrapper.offsetHeight; 
+
+                polarizerObj.pivotX = wrapperWidth / 2;
+                polarizerObj.pivotY = wrapperHeight / 2;
+
+                const calculatedWidth = wrapperWidth * POLARIZER_SIZE_RATIO; 
+                const calculatedHeight = wrapperHeight * POLARIZER_SIZE_RATIO; 
+
+                polarizerObj.element.style.width = calculatedWidth + 'px';
+                polarizerObj.element.style.height = calculatedHeight + 'px';
+                
+                polarizerObj.currentWidth = calculatedWidth;
+                polarizerObj.currentHeight = calculatedHeight;
+                
+                if (polarizerObj.isActive) {
+                    updateActivePolarizerVisuals(); 
+                } else { 
+                    const displayAngle = allPolarizersMirrored ? normalizeAngle(-polarizerObj.intendedAngle) : polarizerObj.intendedAngle;
+                    const pivotOffsetX = calculatedWidth * 0.5;
+                    const pivotOffsetY = calculatedHeight * 1.0;
+                    polarizerObj.element.style.left = (polarizerObj.pivotX - pivotOffsetX) + 'px';
+                    polarizerObj.element.style.top = (polarizerObj.pivotY - pivotOffsetY) + 'px';
+                    polarizerObj.element.style.transform = `rotate(${displayAngle}deg)`;
+                }
+            }
+
+            function renderPresets() {
+                presetsListContainer.innerHTML = ''; 
+                presets.forEach((presetAngle, index) => {
+                    const presetItem = document.createElement('div'); 
+                    presetItem.classList.add('preset-item');
+
+                    const button = document.createElement('button');
+                    button.textContent = `${presetAngle.toFixed(1)}°`;
+                    button.title = `Set angle to ${presetAngle.toFixed(1)}°`;
+                    button.addEventListener('click', () => {
+                        setAngle(presetAngle);
+                    });
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.classList.add('remove-preset');
+                    removeBtn.textContent = 'x';
+                    removeBtn.title = `Remove preset ${presetAngle.toFixed(1)}°`;
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); 
+                        presets.splice(index, 1);
+                        renderPresets();
+                    });
+
+                    presetItem.appendChild(button);
+                    presetItem.appendChild(removeBtn);
+                    presetsListContainer.appendChild(presetItem);
+                });
+                addPresetButton.disabled = presets.length >= MAX_PRESETS;
+            }
+
+            function createNewPolarizerElement() {
+                const newPolContainer = document.createElement('div');
+                newPolContainer.classList.add('polarizer-instance-container');
+                newPolContainer.id = `polarizer-${nextPolarizerId}`;
+                newPolContainer.innerHTML = embeddedPolarizerSVGString;
+                svgWrapper.appendChild(newPolContainer);
+                return newPolContainer;
+            }
+
+            function setActivePolarizer(index) {
+                if (activePolarizerIndex !== -1 && polarizers[activePolarizerIndex]) {
+                    polarizers[activePolarizerIndex].isActive = false;
+                    polarizers[activePolarizerIndex].element.classList.remove('active-polarizer');
+                    polarizers[activePolarizerIndex].element.classList.add('frozen-polarizer');
+                    removeDragListeners(polarizers[activePolarizerIndex].element);
+                }
+
+                activePolarizerIndex = index;
+                
+                if (activePolarizerIndex !== -1 && polarizers[activePolarizerIndex]) {
+                    const newActivePol = polarizers[activePolarizerIndex];
+                    newActivePol.isActive = true;
+                    newActivePol.element.classList.add('active-polarizer');
+                    newActivePol.element.classList.remove('frozen-polarizer');
+                    activePolarizerContainer = newActivePol.element; 
+                    
+                    addDragListeners(activePolarizerContainer);
+                    
+                    angleInput.value = newActivePol.intendedAngle.toFixed(1);
+                    updateActivePolarizerVisuals();
+                } else { // No active polarizer
+                    activePolarizerContainer = null;
+                    angleInput.value = "0"; 
+                }
+                removeLastPolarizerButton.disabled = polarizers.length <= 1;
+            }
+            
+            function addDragListeners(element) {
+                element.addEventListener('pointerdown', onPolarizerPointerDown);
+                element.addEventListener('pointermove', onPolarizerPointerMove);
+                element.addEventListener('pointerup', onPolarizerPointerUpOrCancel);
+                element.addEventListener('pointercancel', onPolarizerPointerUpOrCancel);
+                element.addEventListener('lostpointercapture', onPolarizerPointerUpOrCancel);
+            }
+
+            function removeDragListeners(element) {
+                element.removeEventListener('pointerdown', onPolarizerPointerDown);
+                element.removeEventListener('pointermove', onPolarizerPointerMove);
+                element.removeEventListener('pointerup', onPolarizerPointerUpOrCancel);
+                element.removeEventListener('pointercancel', onPolarizerPointerUpOrCancel);
+                element.removeEventListener('lostpointercapture', onPolarizerPointerUpOrCancel);
+            }
+
+
+            // --- Event Handlers for Active Polarizer (with requestAnimationFrame) ---
+            let animationFrameId = null;
+
+            function dragLoop() {
+                if (!isDragging) {
+                    animationFrameId = null;
+                    return;
+                }
+                if (dragUpdatePending) {
+                    setAngle(lastDragAngle, false); 
+                    dragUpdatePending = false;
+                }
+                animationFrameId = requestAnimationFrame(dragLoop);
+            }
+
+            function onPolarizerPointerDown(e) {
+                if (e.button !== 0 || !polarizers[activePolarizerIndex] || !polarizers[activePolarizerIndex].isActive) return; 
+                
+                const currentPolarizer = polarizers[activePolarizerIndex];
+                isDragging = true;
+                dragUpdatePending = false; 
+                currentPolarizer.element.setPointerCapture(e.pointerId);
+                currentPolarizer.element.style.cursor = 'grabbing';
+
+                const wrapperRect = svgWrapper.getBoundingClientRect();
+                const fixedPivotGlobalX = wrapperRect.left + currentPolarizer.pivotX;
+                const fixedPivotGlobalY = wrapperRect.top + currentPolarizer.pivotY;
+                
+                dragStartPointerAngleOffset = Math.atan2(e.clientY - fixedPivotGlobalY, e.clientX - fixedPivotGlobalX) * 180 / Math.PI;
+                initialPolarizerAngleOnDragStart = currentPolarizer.intendedAngle; 
+                e.preventDefault(); 
+
+                if (!animationFrameId) { 
+                    animationFrameId = requestAnimationFrame(dragLoop);
+                }
+            }
+
+            function onPolarizerPointerMove(e) {
+                if (!isDragging || !polarizers[activePolarizerIndex] || !polarizers[activePolarizerIndex].isActive) return;
+                
+                const currentPolarizer = polarizers[activePolarizerIndex];
+                const wrapperRect = svgWrapper.getBoundingClientRect(); 
+                const fixedPivotGlobalX = wrapperRect.left + currentPolarizer.pivotX;
+                const fixedPivotGlobalY = wrapperRect.top + currentPolarizer.pivotY;
+
+
+                let currentPointerAngle = Math.atan2(e.clientY - fixedPivotGlobalY, e.clientX - fixedPivotGlobalX) * 180 / Math.PI;
+                let deltaAngle = currentPointerAngle - dragStartPointerAngleOffset;
+
+                if (allPolarizersMirrored) {
+                    deltaAngle = -deltaAngle;
+                }
+                
+                lastDragAngle = initialPolarizerAngleOnDragStart + deltaAngle;
+                dragUpdatePending = true;
+                e.preventDefault();
+            }
+
+            function onPolarizerPointerUpOrCancel(e) {
+                if (!isDragging || !polarizers[activePolarizerIndex] || !polarizers[activePolarizerIndex].isActive) return;
+                
+                const currentPolarizer = polarizers[activePolarizerIndex];
+                isDragging = false;
+                if (dragUpdatePending) { 
+                    setAngle(lastDragAngle, true); 
+                    dragUpdatePending = false;
+                } else { 
+                     angleInput.value = currentPolarizer.intendedAngle.toFixed(1);
+                }
+
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+
+                if (currentPolarizer.element.hasPointerCapture(e.pointerId)){ 
+                    currentPolarizer.element.releasePointerCapture(e.pointerId);
+                }
+                currentPolarizer.element.style.cursor = 'grab';
+            }
+
+
+            // Continuous rotation logic
+            function startContinuousRotation(direction, stepSize = ANGLE_STEP_FINE) {
+                stopContinuousRotation(); 
+                const step = direction === 'left' ? -stepSize : stepSize;
+                rotationInterval = setInterval(() => {
+                    if (activePolarizerIndex !== -1) { 
+                        setAngle(polarizers[activePolarizerIndex].intendedAngle + step);
+                    }
+                }, ROTATION_INTERVAL_DELAY);
+            }
+
+            function stopContinuousRotation() {
+                if (rotationInterval) {
+                    clearInterval(rotationInterval);
+                    rotationInterval = null;
+                }
+            }
+
+            // Arrow button listeners for continuous rotation
+            rotateLeftButton.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return; 
+                e.target.setPointerCapture(e.pointerId);
+                startContinuousRotation('left', ANGLE_STEP_FINE);
+            });
+            rotateLeftButton.addEventListener('pointerup', stopContinuousRotation);
+            rotateLeftButton.addEventListener('lostpointercapture', stopContinuousRotation);
+
+
+            rotateRightButton.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return; 
+                e.target.setPointerCapture(e.pointerId);
+                startContinuousRotation('right', ANGLE_STEP_FINE);
+            });
+            rotateRightButton.addEventListener('pointerup', stopContinuousRotation);
+            rotateRightButton.addEventListener('lostpointercapture', stopContinuousRotation);
+
+            // Coarse +/- button listeners
+            rotateCoarseMinusButton.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return;
+                e.target.setPointerCapture(e.pointerId);
+                startContinuousRotation('left', ANGLE_STEP_COARSE);
+            });
+            rotateCoarseMinusButton.addEventListener('pointerup', stopContinuousRotation);
+            rotateCoarseMinusButton.addEventListener('lostpointercapture', stopContinuousRotation);
+
+            rotateCoarsePlusButton.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return;
+                e.target.setPointerCapture(e.pointerId);
+                startContinuousRotation('right', ANGLE_STEP_COARSE);
+            });
+            rotateCoarsePlusButton.addEventListener('pointerup', stopContinuousRotation);
+            rotateCoarsePlusButton.addEventListener('lostpointercapture', stopContinuousRotation);
+
+
+            angleInput.addEventListener('input', () => {
+                 const val = parseFloat(angleInput.value);
+                 if (!isNaN(val) && activePolarizerIndex !== -1) {
+                    setAngle(val, false); 
+                 }
+            });
+            angleInput.addEventListener('change', () => { 
+                const val = parseFloat(angleInput.value);
+                if (activePolarizerIndex !== -1) {
+                    setAngle(isNaN(val) ? polarizers[activePolarizerIndex].intendedAngle : val); 
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    if (e.target === angleInput && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                         return;
+                    } else if (e.target !== angleInput) { 
+                        return;
+                    }
+                }
+                if (activePolarizerIndex === -1) return; 
+                
+                let angleChanged = false;
+                const activePol = polarizers[activePolarizerIndex];
+                if (e.key === 'ArrowLeft') {
+                    setAngle(activePol.intendedAngle - ANGLE_STEP_FINE);
+                    angleChanged = true;
+                } else if (e.key === 'ArrowRight') {
+                    setAngle(activePol.intendedAngle + ANGLE_STEP_FINE);
+                    angleChanged = true;
+                } else if (e.key === 'ArrowUp') {
+                    setAngle(activePol.intendedAngle + ANGLE_STEP_COARSE);
+                    angleChanged = true;
+                } else if (e.key === 'ArrowDown') {
+                    setAngle(activePol.intendedAngle - ANGLE_STEP_COARSE);
+                    angleChanged = true;
+                }
+
+                if (angleChanged) {
+                    e.preventDefault(); 
+                }
+            });
+
+
+            addPresetButton.addEventListener('click', () => {
+                if (activePolarizerIndex === -1) return;
+                const activePolAngle = polarizers[activePolarizerIndex].intendedAngle;
+
+                if (presets.length < MAX_PRESETS) {
+                    if (!presets.some(p => p.toFixed(1) === activePolAngle.toFixed(1))) {
+                        presets.push(activePolAngle);
+                        presets.sort((a,b) => a - b); 
+                        renderPresets();
+                    } else {
+                        displayMessage("Preset for this angle already exists.", true);
+                        addPresetButton.textContent = "Exists!";
+                        setTimeout(() => { addPresetButton.textContent = "Save Current Angle";}, 1000);
+                    }
+                } else {
+                     displayMessage(`Maximum of ${MAX_PRESETS} presets reached.`, true);
+                }
+            });
+
+            addNewPolarizerButton.addEventListener('click', () => {
+                const newElement = createNewPolarizerElement();
+                const wrapperWidth = svgWrapper.offsetWidth;
+                const wrapperHeight = svgWrapper.offsetHeight;
+
+                const newPolarizer = {
+                    id: `polarizer-${nextPolarizerId}`,
+                    element: newElement,
+                    intendedAngle: 0, 
+                    pivotX: wrapperWidth / 2,
+                    pivotY: wrapperHeight / 2,
+                    isActive: false ,
+                    currentWidth: wrapperWidth * POLARIZER_SIZE_RATIO, 
+                    currentHeight: wrapperHeight * POLARIZER_SIZE_RATIO
+                };
+                nextPolarizerId++;
+                polarizers.push(newPolarizer);
+                setActivePolarizer(polarizers.length - 1); 
+                
+                newElement.style.width = newPolarizer.currentWidth + 'px';
+                newElement.style.height = newPolarizer.currentHeight + 'px';
+                updateActivePolarizerVisuals(); 
+                removeLastPolarizerButton.disabled = polarizers.length <= 1;
+            });
+
+            removeLastPolarizerButton.addEventListener('click', () => {
+                if (polarizers.length > 1) { 
+                    const removedPolarizer = polarizers.pop();
+                    removedPolarizer.element.remove();
+                    
+                    if (activePolarizerIndex >= polarizers.length) { 
+                        setActivePolarizer(polarizers.length - 1);
+                    } else {
+                        setActivePolarizer(activePolarizerIndex); 
+                    }
+                     if (polarizers.length === 0) { 
+                        activePolarizerIndex = -1;
+                        angleInput.value = "0";
+                    }
+                }
+                removeLastPolarizerButton.disabled = polarizers.length <= 1;
+            });
+
+
+            mirrorAllButton.addEventListener('click', () => {
+                allPolarizersMirrored = !allPolarizersMirrored;
+                updateAllPolarizersVisuals(); 
+                mirrorAllButton.textContent = allPolarizersMirrored ? "Unmirror All (Angles)" : "Mirror All (Angles)";
+            });
+
+            // New: Dropdown menu functionality for big disk SVG
+            diskTypeSelect.addEventListener('change', (e) => {
+                const selectedValue = e.target.value;
+                switch (selectedValue) {
+                    case 'bigDisk':
+                        currentBigDiskSVG = embeddedBigDiskSVGString;
+                        break;
+                    case 'liveColours':
+                        currentBigDiskSVG = embeddedLiveColours;
+                        break;
+                    case 'bg28':
+                        currentBigDiskSVG = embeddedBG28;
+                        break;
+                    case '360':
+                        currentBigDiskSVG = embedded360;
+                    case 'Ou':
+                        currentBigDiskSVG = embeddedOu;
+                        break;
+                    default:
+                        currentBigDiskSVG = embeddedBigDiskSVGString; // Fallback
+                }
+                bigDiskContainer.innerHTML = currentBigDiskSVG;
+            });
+
+
+            // --- SVG Export Logic ---
+            function parseViewBox(viewBoxString) {
+                if (!viewBoxString) return null;
+                const parts = viewBoxString.split(' ').map(Number);
+                if (parts.length === 4 && parts.every(p => !isNaN(p))) {
+                    return { x: parts[0], y: parts[1], width: parts[2], height: parts[3] };
+                }
+                return null;
+            }
+
+            function cleanSvgStringForParser(svgString) {
+                let cleanedString = svgString.trim(); 
+                cleanedString = cleanedString.replace(/^<\?xml[^>]*\?>\s*/i, ''); 
+                return cleanedString;
+            }
+
+            async function generateSvgFileObject() {
+                const displayWrapperWidth = svgWrapper.offsetWidth; 
+                // Use currentBigDiskSVG for export
+                const diskSvgText = cleanSvgStringForParser(currentBigDiskSVG); 
+                const polarizerTemplateSvgText = cleanSvgStringForParser(embeddedPolarizerSVGString); 
+
+                const parser = new DOMParser();
+                const serializer = new XMLSerializer();
+
+                const diskDoc = parser.parseFromString(diskSvgText, "image/svg+xml");
+                let diskRoot = diskDoc.documentElement;
+                let diskParseError = diskRoot.querySelector('parsererror');
+                if (!diskRoot || diskRoot.nodeName.toLowerCase() === 'html' || (diskParseError && diskParseError.namespaceURI === 'http://www.w3.org/1999/xhtml')) {
+                    console.error("Disk SVG Parse Error Details:", diskRoot.innerHTML || "No details from parser.");
+                    throw new Error('Parse bigDisk.svg failed. Check embedded string and console.');
+                }
+                if (diskRoot.nodeName === '#document-fragment') diskRoot = diskRoot.querySelector('svg');
+                if (!diskRoot) throw new Error('Could not find root <svg> in bigDisk.svg after parsing.');
+
+
+                const outputSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                outputSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                outputSvg.setAttribute("width", EXPORT_SVG_PHYSICAL_SIZE);
+                outputSvg.setAttribute("height", EXPORT_SVG_PHYSICAL_SIZE);
+                outputSvg.setAttribute("viewBox", `0 0 ${EXPORT_SVG_VIEWBOX_UNITS} ${EXPORT_SVG_VIEWBOX_UNITS}`);
+
+
+                const diskGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const diskVB = parseViewBox(diskRoot.getAttribute('viewBox'));
+                const diskPAR = diskRoot.getAttribute('preserveAspectRatio') || 'xMidYMid meet';
+
+                if (diskVB && diskVB.width > 0 && diskVB.height > 0) {
+                    let dScaleX = EXPORT_SVG_VIEWBOX_UNITS / diskVB.width;
+                    let dScaleY = EXPORT_SVG_VIEWBOX_UNITS / diskVB.height;
+                    let dFinalTransformParts = [];
+                    if (diskPAR.toLowerCase() !== 'none') {
+                        const dScaleUniform = Math.min(dScaleX, dScaleY);
+                        const centeredObjectOffsetX = (EXPORT_SVG_VIEWBOX_UNITS - diskVB.width * dScaleUniform) / 2;
+                        const centeredObjectOffsetY = (EXPORT_SVG_VIEWBOX_UNITS - diskVB.height * dScaleUniform) / 2;
+                        dFinalTransformParts.push(`translate(${centeredObjectOffsetX.toFixed(3)}, ${centeredObjectOffsetY.toFixed(3)})`);
+                        dFinalTransformParts.push(`scale(${dScaleUniform.toFixed(3)})`);
+                        dFinalTransformParts.push(`translate(${-diskVB.x.toFixed(3)}, ${-diskVB.y.toFixed(3)})`);
+                    } else {
+                        dFinalTransformParts.push(`scale(${dScaleX.toFixed(3)}, ${dScaleY.toFixed(3)})`);
+                        dFinalTransformParts.push(`translate(${-diskVB.x.toFixed(3)}, ${-diskVB.y.toFixed(3)})`);
+                    }
+                    diskGroup.setAttribute('transform', dFinalTransformParts.join(' '));
+                }
+                Array.from(diskRoot.childNodes).forEach(childNode => {
+                    if (childNode.nodeType === Node.ELEMENT_NODE) {
+                        diskGroup.appendChild(childNode.cloneNode(true));
+                    }
+                });
+                outputSvg.appendChild(diskGroup);
+
+                const exportScaleFactor = EXPORT_SVG_VIEWBOX_UNITS / displayWrapperWidth;
+                
+                polarizers.forEach(polarizerData => {
+                    const polarizerDoc = parser.parseFromString(polarizerTemplateSvgText, "image/svg+xml"); 
+                    let polarizerRoot = polarizerDoc.documentElement;
+                    let polarizerParseError = polarizerRoot.querySelector('parsererror');
+                     if (!polarizerRoot || polarizerRoot.nodeName.toLowerCase() === 'html' || (polarizerParseError && polarizerParseError.namespaceURI === 'http://www.w3.org/1999/xhtml') ) {
+                        console.error("Polarizer SVG Parse Error Details:", polarizerRoot.innerHTML || "No details from parser.");
+                        throw new Error('Parse polarizer.svg template failed. Check embedded string and console.'); 
+                    }
+                    if (polarizerRoot.nodeName === '#document-fragment') polarizerRoot = polarizerRoot.querySelector('svg');
+                    if (!polarizerRoot) throw new Error('Could not find root <svg> in polarizer.svg template after parsing.');
+
+
+                    const exportPivotX = EXPORT_SVG_VIEWBOX_UNITS / 2; 
+                    const exportPivotY = EXPORT_SVG_VIEWBOX_UNITS / 2;
+
+                    const exportPolWidth = EXPORT_SVG_VIEWBOX_UNITS * POLARIZER_SIZE_RATIO; 
+                    const exportPolHeight = EXPORT_SVG_VIEWBOX_UNITS * POLARIZER_SIZE_RATIO;
+                    
+                    const exportAngle = allPolarizersMirrored ? normalizeAngle(-polarizerData.intendedAngle) : polarizerData.intendedAngle;
+
+                    const polarizerOuterGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    polarizerOuterGroup.setAttribute("transform", 
+                        `translate(${exportPivotX.toFixed(3)}, ${exportPivotY.toFixed(3)}) ` +
+                        `rotate(${exportAngle.toFixed(1)})` 
+                    );
+
+                    const polarizerInnerGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    const polVB = parseViewBox(polarizerRoot.getAttribute('viewBox'));
+                    const polPAR = polarizerRoot.getAttribute('preserveAspectRatio') || 'xMidYMid meet';
+
+                    if (polVB && polVB.width > 0 && polVB.height > 0) {
+                        let pScaleX_content = exportPolWidth / polVB.width; 
+                        let pScaleY_content = exportPolHeight / polVB.height; 
+                        let pInnerTransformParts = [];
+                        
+                        let actualScaleX = pScaleX_content;
+                        let actualScaleY = pScaleY_content;
+                        let scaledVBContentWidth = polVB.width * actualScaleX;
+                        let scaledVBContentHeight = polVB.height * actualScaleY;
+                        let parCenteringX = 0;
+                        let parCenteringY = 0;
+
+                        if (polPAR.toLowerCase() !== 'none' && polPAR.toLowerCase() !== 'defer') {
+                            const pScaleUniform = Math.min(pScaleX_content, pScaleY_content);
+                            actualScaleX = pScaleUniform;
+                            actualScaleY = pScaleUniform;
+                            scaledVBContentWidth = polVB.width * actualScaleX;
+                            scaledVBContentHeight = polVB.height * actualScaleY;
+                            parCenteringX = (exportPolWidth - scaledVBContentWidth) / 2;
+                            parCenteringY = (exportPolHeight - scaledVBContentHeight) / 2;
+                        }
+                        
+                        const finalPivotTranslateX = -exportPolWidth * 0.5;
+                        const finalPivotTranslateY = -(parCenteringY + scaledVBContentHeight); 
+
+
+                        pInnerTransformParts.push(`translate(${finalPivotTranslateX.toFixed(3)}, ${finalPivotTranslateY.toFixed(3)})`); 
+                        pInnerTransformParts.push(`translate(${parCenteringX.toFixed(3)}, ${parCenteringY.toFixed(3)})`);          
+                        pInnerTransformParts.push(`scale(${actualScaleX.toFixed(3)}, ${actualScaleY.toFixed(3)})`);                                          
+                        pInnerTransformParts.push(`translate(${-polVB.x.toFixed(3)}, ${-polVB.y.toFixed(3)})`);                   
+                        
+                        polarizerInnerGroup.setAttribute('transform', pInnerTransformParts.join(' '));
+                    } 
+
+                    Array.from(polarizerRoot.childNodes).forEach(childNode => {
+                        if (childNode.nodeType === Node.ELEMENT_NODE) {
+                            polarizerInnerGroup.appendChild(childNode.cloneNode(true));
+                        }
+                    });
+                    polarizerOuterGroup.appendChild(polarizerInnerGroup);
+                    outputSvg.appendChild(polarizerOuterGroup);
+                });
+
+
+                const svgFilename = `angle_scene_${Date.now()}.svg`; 
+                const svgString = serializer.serializeToString(outputSvg);
+                const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+                
+                return new File([blob], svgFilename, { type: blob.type });
+            }
+
+
+            exportSvgButton.addEventListener('click', async () => {
+                exportSvgButton.disabled = true;
+                exportSvgButton.textContent = 'Exporting...';
+                displayMessage(''); 
+                try {
+                    const svgFile = await generateSvgFileObject();
+                    const url = URL.createObjectURL(svgFile);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = svgFile.name; 
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    displayMessage("SVG exported successfully!", false);
+                } catch (error) {
+                    console.error("SVG Export Error:", error);
+                    displayMessage(`Export Error: ${error.message}`, true);
+                } finally {
+                    exportSvgButton.disabled = false;
+                    exportSvgButton.textContent = 'Export SVG (30.4mm)';
+                }
+            });
+
+            shareSvgButton.addEventListener('click', async () => {
+                shareSvgButton.disabled = true;
+                shareSvgButton.textContent = 'Preparing...';
+                displayMessage('');
+
+                try {
+                    const svgFile = await generateSvgFileObject();
+
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [svgFile] })) {
+                        await navigator.share({
+                            files: [svgFile],
+                            title: svgFile.name || 'Polarizer SVG Scene', 
+                            text: `SVG scene from Polarizer Dial: ${svgFile.name || 'polarizer_scene.svg'}` 
+                        });
+                        displayMessage('SVG shared successfully!', false);
+                    } else {
+                        displayMessage('Web Share for files not supported or no compatible app. Use "Export SVG".', true);
+                    }
+                } catch (error) {
+                    console.error('Share Error:', error);
+                    let errorMessage = 'Sharing failed.';
+                    if (error && error.name === 'AbortError') {
+                        errorMessage = 'Share cancelled by user.';
+                    } else if (error && error.message) {
+                        errorMessage = `Share Error: ${error.message}`;
+                    } else if (typeof error === 'object' && Object.keys(error).length === 0) {
+                        errorMessage = 'Sharing failed. No specific error message provided by the browser. This might be due to no compatible share targets or browser restrictions.';
+                    } else if (error) {
+                        try {
+                           errorMessage = `Share Error: ${JSON.stringify(error)}`;
+                        } catch (e) { 
+                           errorMessage = 'Sharing failed with an unknown error.';
+                        }
+                    }
+                    displayMessage(errorMessage, true);
+                } finally {
+                    shareSvgButton.disabled = false;
+                    shareSvgButton.textContent = 'Share SVG';
+                }
+            });
+
+
+            // --- Initialization ---
+            function init() {
+                bigDiskContainer.innerHTML = currentBigDiskSVG; // Initialize with the default SVG
+                
+                const initialElement = createNewPolarizerElement();
+                const wrapperWidth = svgWrapper.offsetWidth;
+                const wrapperHeight = svgWrapper.offsetHeight;
+                const initialPolarizer = {
+                    id: `polarizer-${nextPolarizerId}`,
+                    element: initialElement,
+                    intendedAngle: 0, 
+                    pivotX: wrapperWidth / 2,
+                    pivotY: wrapperHeight / 2,
+                    isActive: false,
+                    currentWidth: wrapperWidth * POLARIZER_SIZE_RATIO, 
+                    currentHeight: wrapperHeight * POLARIZER_SIZE_RATIO
+                };
+                nextPolarizerId++;
+                polarizers.push(initialPolarizer);
+                setActivePolarizer(0); 
+
+                initialElement.style.width = initialPolarizer.currentWidth + 'px';
+                initialElement.style.height = initialPolarizer.currentHeight + 'px';
+                updateActivePolarizerVisuals(); 
+                
+                renderPresets(); 
+                removeLastPolarizerButton.disabled = polarizers.length <= 1; 
+                
+                window.addEventListener('resize', () => {
+                    const newWrapperWidth = svgWrapper.offsetWidth;
+                    const newWrapperHeight = svgWrapper.offsetHeight;
+                    polarizers.forEach(pol => {
+                        pol.pivotX = newWrapperWidth / 2;
+                        pol.pivotY = newWrapperHeight / 2;
+                        const newPolWidth = newWrapperWidth * POLARIZER_SIZE_RATIO;
+                        const newPolHeight = newWrapperHeight * POLARIZER_SIZE_RATIO;
+                        pol.element.style.width = newPolWidth + 'px';
+                        pol.element.style.height = newPolHeight + 'px';
+                        pol.currentWidth = newPolWidth; 
+                        pol.currentHeight = newPolHeight; 
+                        
+                        const displayAngle = allPolarizersMirrored ? normalizeAngle(-pol.intendedAngle) : pol.intendedAngle;
+                        const polWidthForOffset = pol.currentWidth; 
+                        const polHeightForOffset = pol.currentHeight;
+                        const pivotOffsetX = polWidthForOffset * 0.5;
+                        const pivotOffsetY = polHeightForOffset * 1.0;
+                        pol.element.style.left = (pol.pivotX - pivotOffsetX) + 'px';
+                        pol.element.style.top = (pol.pivotY - pivotOffsetY) + 'px';
+                        pol.element.style.transform = `rotate(${displayAngle}deg)`;
+                    });
+                });
+
+                if (!navigator.share) {
+                    shareSvgButton.disabled = true;
+                    shareSvgButton.title = "Web Share API not supported in this browser.";
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init(); 
+            }
+
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ovoid Egg Shape (B/W) + STL Export</title>
+  <style>
+    :root{ color-scheme: light; }
+    html,body{height:100%}
+    body { background:#ffffff; color:#000000; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
+    h1 { margin: 16px 0 8px; font-weight:700; }
+    .controls { margin: 8px 0 12px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    label { color:#000; }
+    input[type="range"]{ width: 300px; }
+    input[type="number"] { width:96px; padding:6px 8px; border-radius:6px; border:1px solid #000; background:#fff; color:#000; }
+    button{ appearance:none; border:1px solid #000; background:#fff; color:#000; padding:8px 12px; border-radius:8px; font-weight:600; cursor:pointer }
+    button:hover{ background:#000; color:#fff }
+    .stage { width: 92vw; height: 58vh; max-width:1000px; }
+    svg { width:100%; height:100%; background:#ffffff; border:1px solid #000; border-radius:8px; }
+    .hint{ font-size:12px }
+    .divider{ width:92vw; max-width:1000px; height:1px; background:#000; opacity:.15; margin:8px 0 }
+  </style>
+</head>
+<body>
+  <h1>Ovoid Egg Shape (Rotated 270°) – 2D & STL</h1>
+
+  <div class="controls">
+    <div class="row">
+      <label>Width to Height Ratio</label>
+      <input id="ratio" type="range" min="0" max="3" step="0.001" value="1.618">
+      <input id="ratioNum" type="number" min="0" max="3" step="0.001" value="1.618">
+      <button id="saveSvg">Save SVG</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>3D (Surface of Revolution) · Quality</label>
+      <span class="hint">Profile steps</span>
+      <input id="stepsProfile" type="number" min="32" max="2000" step="1" value="240">
+      <span class="hint">Radial segments</span>
+      <input id="stepsRadial" type="number" min="12" max="1024" step="1" value="128">
+      <span class="hint">Scale (mm per unit)</span>
+      <input id="scale" type="number" min="0.1" max="1000" step="0.1" value="1">
+      <button id="saveStl">Save STL</button>
+    </div>
+    <div class="row hint">STL uses units = scale × current SVG units. Use scale to size the print (e.g., 2 = 2× bigger).</div>
+  </div>
+
+  <div class="stage">
+    <svg id="svg" viewBox="-300 -200 600 400" aria-label="Ovoid egg shape"></svg>
+  </div>
+
+  <script>
+    const svg = document.getElementById('svg');
+    const ratioSlider = document.getElementById('ratio');
+    const ratioNum = document.getElementById('ratioNum');
+    const saveBtn = document.getElementById('saveSvg');
+    const saveStlBtn = document.getElementById('saveStl');
+    const stepsProfileInput = document.getElementById('stepsProfile');
+    const stepsRadialInput = document.getElementById('stepsRadial');
+    const scaleInput = document.getElementById('scale');
+
+    let lastPathData = '';
+
+    function clear() { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+
+    // Parametric ovoid (same as before), then rotated 270° CW for the 2D display
+    function ovoidPoint(a, b, k, theta){
+      const x0 = a * Math.cos(theta);
+      const y0 = b * (1 - k * Math.cos(theta)) * Math.sin(theta);
+      // rotation 270° CW: x = y0, y = -x0
+      return { x: y0, y: -x0 };
+    }
+
+    function getOvoidPolyline(ratio, steps){
+      const a = 100; // semi-width
+      const b = a * Math.max(ratio, 0.001); // semi-height
+      const k = 0.4; // curvature factor
+      const pts = [];
+      for (let i = 0; i <= steps; i++){
+        const theta = Math.PI - (i/steps)*2*Math.PI; // 180°..-180°
+        pts.push(ovoidPoint(a,b,k,theta));
+      }
+      return {pts, a, b, k};
+    }
+
+    function drawOvoid(ratio){
+      clear();
+      const steps = 200;
+      const {pts} = getOvoidPolyline(ratio, steps);
+      let path = '';
+      pts.forEach((p,i)=>{ path += (i===0? 'M':'L') + p.x.toFixed(3)+','+p.y.toFixed(3); });
+      path += 'Z';
+      lastPathData = path;
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', path);
+      p.setAttribute('stroke', '#000');
+      p.setAttribute('stroke-width', '2');
+      p.setAttribute('fill', 'none');
+      svg.appendChild(p);
+    }
+
+    function update(val){
+      ratioSlider.value = val;
+      ratioNum.value = val;
+      drawOvoid(parseFloat(val));
+    }
+
+    ratioSlider.addEventListener('input', e => update(e.target.value));
+    ratioNum.addEventListener('input', e => update(e.target.value));
+
+    saveBtn.addEventListener('click', () => {
+      const viewBox = svg.getAttribute('viewBox');
+      const eggOnly = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n`+
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="600" height="400">`+
+        `<rect x="-10000" y="-10000" width="20000" height="20000" fill="#ffffff"/>`+
+        `<path d="${lastPathData}" stroke="#000000" stroke-width="2" fill="none"/>`+
+        `</svg>`;
+      const blob = new Blob([eggOnly], {type:'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'egg_ovoid.svg';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 500);
+    });
+
+    // --- STL generation ---
+    // Build a surface of revolution by revolving the right-half profile around the vertical Y axis.
+    function buildProfile(ratio, steps){
+      const {pts} = getOvoidPolyline(ratio, steps);
+      // keep right half (x>=0), then sort by Y ascending (top to bottom)
+      const right = pts.filter(p => p.x >= -1e-9);
+      right.sort((p,q)=> p.y - q.y);
+      // remove nearly-duplicate Y values keeping the max radius at that Y
+      const merged = [];
+      for(const p of right){
+        if(!merged.length){ merged.push({y:p.y, r:Math.max(0,p.x)}); continue; }
+        const last = merged[merged.length-1];
+        if(Math.abs(p.y - last.y) < 1e-3){
+          last.r = Math.max(last.r, p.x);
+        } else {
+          merged.push({y:p.y, r:Math.max(0,p.x)});
+        }
+      }
+      return merged;
+    }
+
+    function normal(ax,ay,az, bx,by,bz, cx,cy,cz){
+      const ux = bx-ax, uy = by-ay, uz = bz-az;
+      const vx = cx-ax, vy = cy-ay, vz = cz-az;
+      // cross u x v
+      let nx = uy*vz - uz*vy;
+      let ny = uz*vx - ux*vz;
+      let nz = ux*vy - uy*vx;
+      const len = Math.hypot(nx,ny,nz) || 1;
+      return [nx/len, ny/len, nz/len];
+    }
+
+    function exportSTL(ratio, stepsProfile, stepsRadial, scale){
+      const prof = buildProfile(ratio, stepsProfile);
+      const TWO_PI = Math.PI*2;
+      const rings = stepsRadial;
+
+      // Precompute rings of vertices
+      const verts = [];
+      for(let i=0;i<prof.length;i++){
+        const {y, r} = prof[i];
+        const row = [];
+        for(let j=0;j<rings;j++){
+          const t = (j / rings) * TWO_PI;
+          const X = (r*Math.cos(t)) * scale; // revolve around Y axis
+          const Z = (r*Math.sin(t)) * scale;
+          const Y = (y) * scale;
+          row.push([X,Y,Z]);
+        }
+        verts.push(row);
+      }
+
+      // ASCII STL assembly
+      let stl = 'solid egg\n';
+      for(let i=0;i<verts.length-1;i++){
+        const rowA = verts[i];
+        const rowB = verts[i+1];
+        for(let j=0;j<rings;j++){
+          const j2 = (j+1) % rings;
+          const a = rowA[j], b = rowB[j], c = rowB[j2], d = rowA[j2];
+          // tri 1: a, b, c
+          let n1 = normal(a[0],a[1],a[2], b[0],b[1],b[2], c[0],c[1],c[2]);
+          stl += ` facet normal ${n1[0]} ${n1[1]} ${n1[2]}\n  outer loop\n`+
+                 `    vertex ${a[0]} ${a[1]} ${a[2]}\n`+
+                 `    vertex ${b[0]} ${b[1]} ${b[2]}\n`+
+                 `    vertex ${c[0]} ${c[1]} ${c[2]}\n  endloop\n endfacet\n`;
+          // tri 2: a, c, d
+          let n2 = normal(a[0],a[1],a[2], c[0],c[1],c[2], d[0],d[1],d[2]);
+          stl += ` facet normal ${n2[0]} ${n2[1]} ${n2[2]}\n  outer loop\n`+
+                 `    vertex ${a[0]} ${a[1]} ${a[2]}\n`+
+                 `    vertex ${c[0]} ${c[1]} ${c[2]}\n`+
+                 `    vertex ${d[0]} ${d[1]} ${d[2]}\n  endloop\n endfacet\n`;
+        }
+      }
+      stl += 'endsolid egg\n';
+
+      const blob = new Blob([stl], {type:'model/stl;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'egg_ovoid.stl';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    }
+
+    saveStlBtn.addEventListener('click', () => {
+      const ratio = parseFloat(ratioSlider.value) || 0;
+      const sp = Math.max(32, Math.min(2000, parseInt(stepsProfileInput.value)||240));
+      const sr = Math.max(12, Math.min(1024, parseInt(stepsRadialInput.value)||128));
+      const sc = Math.max(0.1, Math.min(1000, parseFloat(scaleInput.value)||1));
+      exportSTL(ratio, sp, sr, sc);
+    });
+
+    // initial draw
+    drawOvoid(1.618);
+  </script>
+</body>
+</html>

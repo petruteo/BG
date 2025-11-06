@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numbers to Grid</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .display-section {
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 100px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .boxes-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        
+        .number-box {
+            padding: 20px;
+            width: 300px;
+            flex: 0 0 300px;
+        }
+        
+        .bars {
+            font-family: monospace;
+            font-size: 20px;
+            color: #333;
+            letter-spacing: 2px;
+            min-height: 30px;
+            word-wrap: break-word;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+        
+        .grid-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .grid-container {
+            display: inline-block;
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 5px;
+            overflow: visible;
+        }
+        
+        .grid-options {
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .grid-toggle {
+            padding: 6px 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        
+        .grid-toggle:hover {
+            background-color: #333;
+        }
+        
+        .grid-toggle.active {
+            background-color: #333;
+        }
+        
+        .dual-grid-controls {
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .angle-input {
+            width: 60px;
+            padding: 4px;
+            margin: 0 5px;
+        }
+        
+        .download-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .download-btn:hover {
+            background-color: #333;
+        }
+        
+        #gridSvg {
+            background-color: white;
+            border: 1px solid #ccc;
+        }
+        
+        .buttons-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 5px;
+            margin-top: 30px;
+        }
+        
+        .pair-button {
+            padding: 6px 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .pair-button:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+        
+        .custom-input-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .custom-input {
+            padding: 6px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 120px;
+        }
+        
+        .custom-btn {
+            padding: 6px 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .custom-btn:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="display-section" id="displaySection">
+            <div class="title" id="titleDisplay">Click a button to visualize</div>
+            <div class="boxes-container">
+                <div class="number-box">
+                    <div class="bars" id="firstBars"></div>
+                </div>
+                <div class="number-box">
+                    <div class="bars" id="secondBars"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid-section" id="gridSection" style="display: none;">
+            <div class="grid-options">
+                <button class="grid-toggle active" id="simpleBtn" onclick="setGridStyle('simple')">Simple Grid</button>
+                <button class="grid-toggle" id="checkeredBtn" onclick="setGridStyle('checkered')">Checkered Grid</button>
+            </div>
+            <div class="dual-grid-controls">
+                <button class="download-btn" id="dualGridBtn" onclick="toggleDualGrid()">Enable Dual Grid</button>
+                <span id="angleControl" style="display: none;">
+                    Angle: <input type="number" class="angle-input" id="angleInput" value="66" min="0" max="360" onchange="updateAngle()"> degrees
+                </span>
+                <span id="topGridControl" style="display: none; margin-left: 10px;">
+                    Top Grid: <input type="text" class="custom-input" id="topGridInput" placeholder="e.g. 5 7" style="width: 80px;">
+                    <button class="custom-btn" onclick="updateTopGrid()">Update</button>
+                </span>
+            </div>
+            <div class="grid-container">
+                <svg id="gridSvg" width="400" height="400"></svg>
+            </div>
+            <button class="download-btn" onclick="downloadSvg()">Download as SVG</button>
+            <button class="download-btn" id="swapBtn" onclick="swapGrid()">Change to horizontal</button>
+            <div class="custom-input-section">
+                <input type="text" class="custom-input" id="customInput" placeholder="e.g. 5 7 or 5/7">
+                <button class="custom-btn" onclick="showCustomGrid()">Show Custom Grid</button>
+            </div>
+        </div>
+        
+        <div class="buttons-section" id="buttonsSection"></div>
+    </div>
+
+    <script>
+        let currentPair = null;
+        let isSwapped = false;
+        let gridStyle = 'simple';
+        let isDualGrid = false;
+        let gridAngle = 66;
+        let currentRows = 0;
+        let currentCols = 0;
+        let topGridRows = 0;
+        let topGridCols = 0;
+        
+        const pairs = [
+            { first: 2, second: 1, title: "general inflammation" },
+            { first: 8, second: 9, title: "knees" },
+            { first: 36, second: 19, title: "total spine" },
+            { first: 10, second: 11, title: "lower back" },
+            { first: 4, second: 19, title: "upper back" },
+            { first: 20, second: 9, title: "tailbone" },
+            { first: 12, second: 7, title: "sciatic nerve" },
+            { first: 10, second: 11, title: "nerve inflammation" },
+            { first: 28, second: 19, title: "nervous system" },
+            { first: 8, second: 7, title: "discs" },
+            { first: 8, second: 7, title: "liver" },
+            { first: 10, second: 11, title: "stomach" },
+            { first: 14, second: 13, title: "pancreas" },
+            { first: 12, second: 15, title: "large intestine" },
+            { first: 16, second: 7, title: "small intestine" },
+            { first: 18, second: 9, title: "kidney" },
+            { first: 6, second: 7, title: "uterus" },
+            { first: 8, second: 7, title: "eyes" },
+            { first: 6, second: 9, title: "macula" },
+            { first: 12, second: 7, title: "pituitary" },
+            { first: 16, second: 19, title: "pineal" },
+            { first: 16, second: 9, title: "brain general" },
+            { first: 10, second: 9, title: "bone marrow" },
+            { first: 12, second: 9, title: "top of head" },
+            { first: 6, second: 5, title: "prostate" },
+            { first: 16, second: 25, title: "prostate" },
+            { first: 8, second: 9, title: "back of neck/skull" },
+            { first: 8, second: 5, title: "shoulder" },
+            { first: 8, second: 7, title: "shoulder" },
+            { first: 14, second: 17, title: "migraine" },
+            { first: 10, second: 11, title: "female fertility" },
+            { first: 16, second: 13, title: "male therapy" },
+            { first: 18, second: 11, title: "lungs" },
+            { first: 10, second: 11, title: "heart" },
+            { first: 12, second: 9, title: "ears" },
+            { first: 16, second: 13, title: "throat" },
+            { first: 10, second: 13, title: "throat" },
+            { first: 16, second: 17, title: "thyroid" },
+            { first: 28, second: 27, title: "arthritis" },
+            { first: 10, second: 11, title: "life force" },
+            { first: 16, second: 9, title: "muscles" },
+            { first: 28, second: 5, title: "ligaments" },
+            { first: 32, second: 21, title: "gridlines" },
+            { first: 12, second: 9, title: "EMF" },
+            { first: 28, second: 15, title: "vitiligo" },
+            { first: 28, second: 17, title: "skin" },
+            { first: 16, second: 7, title: "hair" },
+            { first: 42, second: 17, title: "Parkinson" },
+            { first: 28, second: 19, title: "cancer" },
+            { first: 10, second: 19, title: "cysts" },
+            { first: 16, second: 7, title: "abscess" },
+            { first: 12, second: 9, title: "hemorrhoids" },
+            { first: 10, second: 9, title: "gums" },
+            { first: 12, second: 9, title: "teeth" },
+            { first: 26, second: 17, title: "water retention" },
+            { first: 32, second: 15, title: "relaxation" },
+            { first: 8, second: 7, title: "cv-imagination" },
+            { first: 16, second: 7, title: "allergy" },
+            { first: 28, second: 15, title: "neck Veins, blood pressure" }
+        ];
+
+        function displayButtons() {
+            const buttonsSection = document.getElementById('buttonsSection');
+            buttonsSection.innerHTML = '';
+            
+            pairs.forEach((pair, index) => {
+                const button = document.createElement('button');
+                button.className = 'pair-button';
+                button.textContent = `${pair.first}/${pair.second} - ${pair.title}`;
+                button.onclick = () => showPair(pair);
+                buttonsSection.appendChild(button);
+            });
+        }
+
+        function showPair(pair) {
+            currentPair = pair;
+            isSwapped = false;
+            document.getElementById('swapBtn').textContent = 'Change to horizontal';
+            
+            const titleDisplay = document.getElementById('titleDisplay');
+            const firstBars = document.getElementById('firstBars');
+            const secondBars = document.getElementById('secondBars');
+            const gridSection = document.getElementById('gridSection');
+            
+            const formattedTitle = pair.title.charAt(0).toUpperCase() + pair.title.slice(1);
+            titleDisplay.textContent = `${formattedTitle} (${pair.first}/${pair.second})`;
+            
+            firstBars.textContent = '|'.repeat(pair.first);
+            secondBars.textContent = '|'.repeat(pair.second);
+            
+            currentRows = pair.first;
+            currentCols = pair.second;
+            topGridRows = pair.first; // Initialize top grid with same dimensions
+            topGridCols = pair.second;
+            
+            createGrid();
+            gridSection.style.display = 'block';
+        }
+        
+        function setGridStyle(style) {
+            gridStyle = style;
+            document.getElementById('simpleBtn').classList.toggle('active', style === 'simple');
+            document.getElementById('checkeredBtn').classList.toggle('active', style === 'checkered');
+            createGrid();
+        }
+        
+        function toggleDualGrid() {
+            isDualGrid = !isDualGrid;
+            const btn = document.getElementById('dualGridBtn');
+            const angleControl = document.getElementById('angleControl');
+            const topGridControl = document.getElementById('topGridControl');
+            
+            if (isDualGrid) {
+                btn.textContent = 'Disable Dual Grid';
+                angleControl.style.display = 'inline';
+                topGridControl.style.display = 'inline';
+            } else {
+                btn.textContent = 'Enable Dual Grid';
+                angleControl.style.display = 'none';
+                topGridControl.style.display = 'none';
+            }
+            
+            createGrid();
+        }
+        
+        function updateTopGrid() {
+            const input = document.getElementById('topGridInput').value.trim();
+            if (!input) return;
+            
+            const numbers = input.match(/\d+/g);
+            if (numbers && numbers.length >= 2) {
+                topGridRows = parseInt(numbers[0]);
+                topGridCols = parseInt(numbers[1]);
+                createGrid();
+            }
+        }
+        
+        function updateAngle() {
+            gridAngle = parseFloat(document.getElementById('angleInput').value) || 0;
+            if (isDualGrid) {
+                createGrid();
+            }
+        }
+        
+        function createGrid() {
+            if (currentRows === 0 || currentCols === 0) return;
+            
+            const svg = document.getElementById('gridSvg');
+            const margin = 50;
+            const maxDimension = Math.max(currentRows, currentCols, topGridRows, topGridCols);
+            const availableSize = 300;
+            const cellSize = availableSize / maxDimension;
+            const gridWidth = cellSize * currentCols;
+            const gridHeight = cellSize * currentRows;
+            const topGridWidth = cellSize * topGridCols;
+            const topGridHeight = cellSize * topGridRows;
+            
+            let svgWidth = 800; // Start larger
+            let svgHeight = 800;
+            
+            if (isDualGrid) {
+                // Make SVG large enough for any rotation
+                const totalSize = Math.max(gridWidth, gridHeight, topGridWidth, topGridHeight) * 3;
+                svgWidth = totalSize;
+                svgHeight = totalSize;
+            } else {
+                svgWidth = gridWidth + 2 * margin;
+                svgHeight = gridHeight + 2 * margin + 100;
+            }
+            
+            svg.setAttribute('width', svgWidth);
+            svg.setAttribute('height', svgHeight);
+            svg.style.width = svgWidth + 'px';
+            svg.style.height = svgHeight + 'px';
+            svg.innerHTML = '';
+            
+            // Background
+            const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bg.setAttribute('width', svgWidth);
+            bg.setAttribute('height', svgHeight);
+            bg.setAttribute('fill', 'white');
+            svg.appendChild(bg);
+            
+            // Title
+            const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            title.setAttribute('x', svgWidth / 2);
+            title.setAttribute('y', '30');
+            title.setAttribute('text-anchor', 'middle');
+            title.setAttribute('font-family', 'Arial');
+            title.setAttribute('font-size', '14');
+            title.setAttribute('fill', 'black');
+            
+            let titleText = '';
+            const orientation = isSwapped ? 'print horizontal' : 'print vertical';
+            if (currentPair) {
+                const formattedTitle = currentPair.title.charAt(0).toUpperCase() + currentPair.title.slice(1);
+                titleText = `${formattedTitle} - Grid ${currentRows}×${currentCols} (${orientation})`;
+                if (isDualGrid) {
+                    titleText += ` - Dual Grid ${gridAngle}°`;
+                    if (topGridRows !== currentRows || topGridCols !== currentCols) {
+                        titleText += ` - Top: ${topGridRows}×${topGridCols}`;
+                    }
+                }
+            } else {
+                titleText = `Grid ${currentRows}×${currentCols} (${orientation})`;
+            }
+            title.textContent = titleText;
+            svg.appendChild(title);
+            
+            if (isDualGrid) {
+                // Center point for dual grid layout
+                const centerX = svgWidth / 2;
+                const centerY = svgHeight / 2;
+                
+                // Position bottom grid
+                const bottomGridX = centerX - gridWidth / 2;
+                const bottomGridY = centerY - gridHeight / 2;
+                
+                // Draw bottom grid
+                drawSingleGrid(svg, bottomGridX, bottomGridY, gridWidth, gridHeight, currentRows, currentCols, false);
+                
+                // Create top grid with rotation around top-left corner of bottom grid
+                const topGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                const pivotX = bottomGridX;
+                const pivotY = bottomGridY;
+                
+                // Apply rotation transform
+                topGroup.setAttribute('transform', `rotate(-${gridAngle} ${pivotX} ${pivotY})`);
+                
+                // Draw top grid - positioned so its bottom-left corner is at the pivot
+                drawSingleGrid(topGroup, pivotX, pivotY - topGridHeight, topGridWidth, topGridHeight, topGridRows, topGridCols, true);
+                svg.appendChild(topGroup);
+            } else {
+                // Single grid - center it
+                const gridX = (svgWidth - gridWidth) / 2;
+                const gridY = 60;
+                drawSingleGrid(svg, gridX, gridY, gridWidth, gridHeight, currentRows, currentCols, false);
+            }
+            
+            svg.setAttribute('data-rows', currentRows);
+            svg.setAttribute('data-cols', currentCols);
+        }
+        
+        function drawSingleGrid(parent, x, y, width, height, rows, cols, isTopGrid) {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('transform', `translate(${x}, ${y})`);
+            
+            const cellWidth = width / cols;
+            const cellHeight = height / rows;
+            
+            // Draw checkered pattern
+            if (gridStyle === 'checkered') {
+                // First, if it's the top grid, add a semi-transparent white rectangle
+                if (isTopGrid) {
+                    const whiteBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    whiteBg.setAttribute('x', '0');
+                    whiteBg.setAttribute('y', '0');
+                    whiteBg.setAttribute('width', width);
+                    whiteBg.setAttribute('height', height);
+                    whiteBg.setAttribute('fill', 'white');
+                    whiteBg.setAttribute('opacity', '0.7');
+                    g.appendChild(whiteBg);
+                }
+                
+                // Then add black squares - NO OPACITY on these!
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        if ((row + col) % 2 === 0) {
+                            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            rect.setAttribute('x', col * cellWidth);
+                            rect.setAttribute('y', row * cellHeight);
+                            rect.setAttribute('width', cellWidth);
+                            rect.setAttribute('height', cellHeight);
+                            rect.setAttribute('fill', '#000000'); // Pure black
+                            // NO opacity attribute!
+                            g.appendChild(rect);
+                        }
+                    }
+                }
+            }
+            
+            // Grid lines
+            for (let i = 0; i <= cols; i++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', i * cellWidth);
+                line.setAttribute('y1', '0');
+                line.setAttribute('x2', i * cellWidth);
+                line.setAttribute('y2', height);
+                line.setAttribute('stroke', 'black');
+                line.setAttribute('stroke-width', '1');
+                if (isTopGrid) {
+                    line.setAttribute('opacity', '0.7');
+                }
+                g.appendChild(line);
+            }
+            
+            for (let i = 0; i <= rows; i++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '0');
+                line.setAttribute('y1', i * cellHeight);
+                line.setAttribute('x2', width);
+                line.setAttribute('y2', i * cellHeight);
+                line.setAttribute('stroke', 'black');
+                line.setAttribute('stroke-width', '1');
+                if (isTopGrid) {
+                    line.setAttribute('opacity', '0.7');
+                }
+                g.appendChild(line);
+            }
+            
+            parent.appendChild(g);
+        }
+        
+        function swapGrid() {
+            if (currentPair) {
+                isSwapped = !isSwapped;
+                document.getElementById('swapBtn').textContent = isSwapped ? 'Change back to vertical' : 'Change to horizontal';
+                
+                const temp = currentRows;
+                currentRows = currentCols;
+                currentCols = temp;
+                
+                const titleDisplay = document.getElementById('titleDisplay');
+                const firstBars = document.getElementById('firstBars');
+                const secondBars = document.getElementById('secondBars');
+                
+                const formattedTitle = currentPair.title.charAt(0).toUpperCase() + currentPair.title.slice(1);
+                titleDisplay.textContent = `${formattedTitle} (${currentRows}/${currentCols})`;
+                
+                firstBars.textContent = '|'.repeat(currentRows);
+                secondBars.textContent = '|'.repeat(currentCols);
+                
+                createGrid();
+            }
+        }
+
+        function showCustomGrid() {
+            const input = document.getElementById('customInput').value.trim();
+            if (!input) return;
+            
+            const numbers = input.match(/\d+/g);
+            if (numbers && numbers.length >= 2) {
+                const first = parseInt(numbers[0]);
+                const second = parseInt(numbers[1]);
+                
+                showPair({
+                    first: first,
+                    second: second,
+                    title: `custom ${first}/${second}`
+                });
+            } else {
+                alert('Please enter two numbers (e.g., "5 7" or "5/7" or "5,7")');
+            }
+        }
+        
+        function downloadSvg() {
+            const svg = document.getElementById('gridSvg');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = svgUrl;
+            
+            let titlePart = currentPair ? currentPair.title.replace(/[^a-z0-9]/gi, '_') : 'custom';
+            const orientation = isSwapped ? 'print_horizontal' : 'print_vertical';
+            const dualPart = isDualGrid ? `_dual_${gridAngle}deg` : '';
+            
+            downloadLink.download = `grid_${titlePart}_${currentRows}x${currentCols}_${orientation}${dualPart}.svg`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(svgUrl);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('customInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    showCustomGrid();
+                }
+            });
+        });
+
+        displayButtons();
+    </script>
+</body>
+</html>

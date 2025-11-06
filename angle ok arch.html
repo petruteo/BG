@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Adjustable Angle with Center Arc</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap');
+    body { display: flex; flex-direction: column; align-items: center; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background: #ffffff; color: #212121; height: 100vh; box-sizing: border-box; color: #212121; height: 100vh; box-sizing: border-box; }
+    #angleInput { font-weight: 500; font-size: 54px; margin: 16px 0 8px; border: none; background: transparent; text-align: center; width: 200px; }
+    #angleInput:focus { outline: none; border-bottom: 2px solid #6200ee; }
+    #controls { display: flex; align-items: center; gap: 12px; background: #fff; padding: 12px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px; margin-bottom: 16px; }
+    button { background: #e0e0e0; color: #212121; border: none; padding: 10px 16px; border-radius: 4px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #d5d5d5; }
+    input[type=number]#ratioInput { width: 80px; padding: 6px 8px; border: none; border-bottom: 2px solid #ccc; font-size: 16px; text-align: center; background: transparent; transition: border-bottom-color 0.2s; }
+    input[type=number]#ratioInput:focus { outline: none; border-bottom-color: #6200ee; }
+    canvas { width: 100%; flex: 1 1 auto; display: block; touch-action: none; }
+    #centerImg { display: none; width: 40px; height: 40px; }
+  </style>
+</head>
+<body>
+  <img id="centerImg" src="https://media.licdn.com/dms/image/v2/D4D03AQFnbVGBuZ3Mpg/profile-displayphoto-shrink_800_800/B4DZXHxU5UHAAc-/0/1742813352106?e=1751500800&v=beta&t=dnTeE9zxyoCshLuV3uaJQe6uDN8UCc4I2ShP6wa4NpI" alt="center icon">
+  <canvas id="angleCanvas"></canvas>
+
+  <!-- Editable angle input -->
+  <input id="angleInput" type="number" step="0.1" value="90">°
+
+  <div id="controls">
+    <button id="decrease">◀️</button>
+    <button id="increase">▶️</button>
+    <label for="ratioInput">Ratio:</label>
+    <input id="ratioInput" type="number" step="0.001" min="0.1" value="1.618">
+    <button id="saveSvg">💾 Save SVG</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('angleCanvas');
+    const ctx = canvas.getContext('2d');
+    const angleInput = document.getElementById('angleInput');
+    const ratioInput = document.getElementById('ratioInput');
+    const controls = document.getElementById('controls');
+    const centerImg = document.getElementById('centerImg');
+
+    let currentAngle = parseFloat(angleInput.value);
+    let ratio = parseFloat(ratioInput.value);
+    const scaleFactor = 0.6;
+    const iconSize = 40;
+    let dragging = false;
+
+    let centerX, centerY, armShort, armLong, arcRadius;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight - controls.offsetHeight - angleInput.offsetHeight - 48;
+      drawAngle();
+    }
+
+    function drawAngle() {
+      const radians = currentAngle * Math.PI / 180;
+      arcRadius = 80;
+      centerX = canvas.width / 2;
+      centerY = canvas.height * 2 / 3;
+      const base = canvas.width * 0.4;
+      armShort = base * scaleFactor;
+      armLong = base * ratio * scaleFactor;
+      const x2 = centerX + armLong * Math.cos(radians);
+      const y2 = centerY - armLong * Math.sin(radians);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#212121';
+      ctx.lineWidth = 6;
+
+      // Draw arc
+      ctx.beginPath(); ctx.arc(centerX, centerY, arcRadius, 0, -radians, true); ctx.stroke();
+      // Draw short arm
+      ctx.beginPath(); ctx.moveTo(centerX + arcRadius, centerY); ctx.lineTo(centerX + arcRadius + armShort, centerY); ctx.stroke();
+      // Draw long arm
+      const x2s = centerX + arcRadius * Math.cos(radians);
+      const y2s = centerY - arcRadius * Math.sin(radians);
+      ctx.beginPath(); ctx.moveTo(x2s, y2s); ctx.lineTo(x2, y2); ctx.stroke();
+
+      // Draw center icon
+      const midLen = arcRadius + armShort * 0.7;
+      const midX = centerX + midLen * Math.cos(radians / 2);
+      const midY = centerY - midLen * Math.sin(radians / 2);
+      if (centerImg.complete) ctx.drawImage(centerImg, midX - iconSize / 2, midY - iconSize / 2, iconSize, iconSize);
+
+      angleInput.value = currentAngle.toFixed(1);
+    }
+
+    function changeAngle(delta) {
+      currentAngle = (currentAngle + delta + 360) % 360;
+      drawAngle();
+    }
+
+    function getAngleFromEvent(e) {
+      const rect = canvas.getBoundingClientRect();
+      const dx = e.clientX - rect.left - centerX;
+      const dy = centerY - (e.clientY - rect.top);
+      let ang = Math.atan2(dy, dx) * 180 / Math.PI;
+      if (ang < 0) ang += 360;
+      return ang;
+    }
+
+    // Drag endpoint only
+    canvas.addEventListener('pointerdown', e => {
+      const ang = currentAngle * Math.PI / 180;
+      const x2 = centerX + armLong * Math.cos(ang);
+      const y2 = centerY - armLong * Math.sin(ang);
+      const rect = canvas.getBoundingClientRect();
+      const dx = e.clientX - rect.left - x2;
+      const dy = e.clientY - rect.top - y2;
+      if (Math.hypot(dx, dy) < iconSize) dragging = true;
+    });
+    window.addEventListener('pointermove', e => { if (!dragging) return; changeAngle(getAngleFromEvent(e) - currentAngle); });
+    window.addEventListener('pointerup', () => dragging = false);
+
+    // Button controls
+    document.getElementById('increase').onclick = () => changeAngle(0.5);
+    document.getElementById('decrease').onclick = () => changeAngle(-0.5);
+
+    // Keyboard controls
+    window.addEventListener('keydown', e => {
+      const active = document.activeElement === angleInput;
+      if (active) {
+        if (e.key === 'Enter') {
+          const v = parseFloat(angleInput.value);
+          if (!isNaN(v)) { currentAngle = v; drawAngle(); }
+        }
+        if (e.key === 'ArrowUp') { changeAngle(0.1); e.preventDefault(); }
+        if (e.key === 'ArrowDown') { changeAngle(-0.1); e.preventDefault(); }
+      } else {
+        if (e.key === 'ArrowRight') changeAngle(0.5);
+        if (e.key === 'ArrowLeft') changeAngle(-0.5);
+        if (e.key === 'ArrowUp') changeAngle(0.1);
+        if (e.key === 'ArrowDown') changeAngle(-0.1);
+      }
+    });
+
+    // Ratio input
+    ratioInput.addEventListener('input', () => { ratio = parseFloat(ratioInput.value) || 1; drawAngle(); });
+    document.getElementById('saveSvg').onclick = saveSvg;
+    centerImg.onload = drawAngle;
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function saveSvg() {
+      const radians = currentAngle * Math.PI / 180;
+      const cx = centerX, cy = centerY;
+      const x2 = cx + armLong * Math.cos(radians);
+      const y2 = cy - armLong * Math.sin(radians);
+      const x2s = cx + arcRadius * Math.cos(radians);
+      const y2s = cy - arcRadius * Math.sin(radians);
+      const midLen = arcRadius + armShort * 0.7;
+      const midX = cx + midLen * Math.cos(radians / 2);
+      const midY = cy - midLen * Math.sin(radians / 2);
+      const largeArc = Math.abs(radians) > Math.PI ? 1 : 0;
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', canvas.width);
+      svg.setAttribute('height', canvas.height);
+      const mk = (tag, attrs) => { const el = document.createElementNS(svg.namespaceURI, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); return el; };
+      svg.appendChild(mk('path', { d: `M${cx+arcRadius},${cy} A${arcRadius},${arcRadius} 0 ${largeArc},0 ${x2s},${y2s}`, fill: 'none', stroke: '#212121', 'stroke-width': 6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+      svg.appendChild(mk('line', { x1: cx+arcRadius, y1: cy, x2: cx+arcRadius+armShort, y2: cy, stroke: '#212121', 'stroke-width': 6, 'stroke-linecap': 'round' }));
+      svg.appendChild(mk('line', { x1: x2s, y1: y2s, x2: x2, y2: y2, stroke: '#212121', 'stroke-width': 6, 'stroke-linecap': 'round' }));
+      svg.appendChild(mk('image', { href: centerImg.src, x: midX-iconSize/2, y: midY-iconSize/2, width: iconSize, height: iconSize }));
+      const xml = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>${xml}`], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'angle.svg'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

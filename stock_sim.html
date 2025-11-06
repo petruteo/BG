@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JS Candlestick Chart Simulation</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    h1 {
+      margin: 20px 0 10px 0;
+    }
+
+    #chartContainer {
+      position: relative;
+      width: 1600px;
+      height: 800px;
+      border: 1px solid #ccc;
+      background: #fff;
+    }
+
+    #chartCanvas {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      display: block;
+      position: absolute;
+    }
+
+    #pauseOverlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      font-size: 80px;
+      font-weight: bold;
+      color: #000000;
+      opacity: 0.5;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Candlestick Sim Trainer</h1>
+<div id="chartContainer">
+  <canvas id="chartCanvas" width="1600" height="800"></canvas>
+  <div id="pauseOverlay">⏸️</div>
+</div>
+
+<script>
+  // Number of candlesticks displayed on the chart at once
+  const MAX_CANDLES = 50;
+
+  // Each candlestick object has: { open, close, high, low }
+  let candles = [];
+
+  // We'll start with some base price
+  let lastClose = 5000;
+
+  // Set up x-axis time variables
+  const chartStartDate = new Date();
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  // Generate a random candlestick based on the previous close
+  function generateRandomCandle(previousClose) {
+    // Decide a random change
+    const volatility = 2; // the "range" of possible changes
+    const open = previousClose;
+    const close = open + (Math.random() * volatility * 2 - volatility);
+    const high = Math.max(open, close) + Math.random() * volatility;
+    const low = Math.min(open, close) - Math.random() * volatility;
+
+    return {
+      open,
+      close,
+      high,
+      low
+    };
+  }
+
+  // Utility function to add a specified number of business days (skipping weekends) to a date
+  function addBusinessDays(startDate, days) {
+    let date = new Date(startDate);
+    while (days > 0) {
+      date.setDate(date.getDate() + 1);
+      // Skip Saturday (6) and Sunday (0)
+      if (date.getDay() !== 0 && date.getDay() !== 6) {
+        days--;
+      }
+    }
+    return date;
+  }
+
+  // Add a new random candlestick to the array
+  function addNewCandle() {
+    const newCandle = generateRandomCandle(lastClose);
+    candles.push(newCandle);
+    lastClose = newCandle.close;
+  }
+
+  // Draw the chart on the canvas
+  function drawChart() {
+    const canvas = document.getElementById("chartCanvas");
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // If no data yet, draw default scales and exit
+    if (candles.length === 0) {
+      // Set default y-scale values
+      let minPrice = 5000;
+      let maxPrice = minPrice + 20;
+
+      // Draw x-axis line
+      ctx.beginPath();
+      ctx.moveTo(0, height);
+      ctx.lineTo(width, height);
+      ctx.strokeStyle = "#000000";
+      ctx.stroke();
+
+      // Draw tick marks and labels for the x-axis
+      ctx.fillStyle = "#000000";
+      ctx.font = "10px sans-serif";
+      let numLabels = 5;
+      for (let j = 0; j <= numLabels; j++) {
+        let candleDate = addBusinessDays(chartStartDate, j);
+        let dateStr = `${candleDate.getDate()}/${candleDate.getMonth() + 1}`;
+        ctx.fillText(dateStr, j * (width / numLabels) - 20, height - 2);
+      }
+      return;
+    }
+
+    // Find min and max for scaling
+    let minPrice = Infinity;
+    let maxPrice = -Infinity;
+    candles.forEach(c => {
+      if (c.low < minPrice) minPrice = c.low;
+      if (c.high > maxPrice) maxPrice = c.high;
+    });
+
+    // Add some margin so the wicks don't touch the edges
+    const margin = (maxPrice - minPrice) * 0.1;
+    minPrice -= margin;
+    maxPrice += margin;
+
+    // Force the y-axis to start from 5000
+    if (minPrice < 5000) { minPrice = 5000; }
+    if (maxPrice - minPrice < 20) { maxPrice = minPrice + 20; }
+
+    // Pan vertically: shift the scale so that the newest candlestick is centered vertically.
+    let lastCandle = candles[candles.length - 1];
+    let newCandleCenter = (lastCandle.open + lastCandle.close) / 2;
+    let currentMid = (minPrice + maxPrice) / 2;
+    let diff = newCandleCenter - currentMid;
+    minPrice += diff;
+    maxPrice += diff;
+
+    // Scaling functions
+    const scaleY = price => {
+      return height - ((price - minPrice) / (maxPrice - minPrice)) * height;
+    };
+
+    // Draw horizontal background stripes based on fixed price intervals
+    const gridSpacing = 2; // Fixed price interval for grid lines (adjust if needed)
+    let firstGridLine = Math.floor(minPrice / gridSpacing) * gridSpacing;
+    let gridLines = [];
+    for (let price = firstGridLine; price <= maxPrice; price += gridSpacing) {
+      gridLines.push(price);
+    }
+    for (let i = 0; i < gridLines.length - 1; i++) {
+      let y1 = scaleY(gridLines[i]);
+      let y2 = scaleY(gridLines[i + 1]);
+      let topY = Math.min(y1, y2);
+      let stripeHeight = Math.abs(y2 - y1);
+      ctx.fillStyle = (i % 2 === 0) ? "#f7f7f7" : "#ffffff";
+      ctx.fillRect(0, topY, width, stripeHeight);
+    }
+
+    // Fixed candle dimensions
+    const candleWidth = 40;
+    const candleGap = 3; // Updated gap value
+    const newCandleX = width / 2; // new candle always appears at the center of the canvas
+
+    // Draw each candlestick
+    candles.forEach((candle, i) => {
+      // Calculate x position so that the newest candle (last element) is at center
+      const x = newCandleX + (i - (candles.length - 1)) * (candleWidth + candleGap);
+
+      // Scale Y positions
+      const yOpen = scaleY(candle.open);
+      const yClose = scaleY(candle.close);
+      const yHigh = scaleY(candle.high);
+      const yLow = scaleY(candle.low);
+
+      // Decide candle body color: green if close >= open, red otherwise
+      const isBullish = candle.close >= candle.open;
+      ctx.strokeStyle = "#000000";  // vertical wicks in black
+      ctx.fillStyle = isBullish ? "#00cc00" : "#cc0000";
+
+      // Draw the wick (high-low line)
+      ctx.beginPath();
+      ctx.moveTo(x + candleWidth / 2, yHigh);
+      ctx.lineTo(x + candleWidth / 2, yLow);
+      ctx.stroke();
+
+      // Draw the candle body (open-close rectangle)
+      const bodyTop = Math.min(yOpen, yClose);
+      const bodyBottom = Math.max(yOpen, yClose);
+      const bodyHeight = bodyBottom - bodyTop;
+      ctx.fillRect(x, bodyTop, candleWidth, bodyHeight);
+    });
+
+    // Draw horizontal x-axis line at the bottom
+    ctx.beginPath();
+    ctx.moveTo(0, height);
+    ctx.lineTo(width, height);
+    ctx.strokeStyle = "#000000";
+    ctx.stroke();
+
+    // Draw horizontal dotted grid lines and z-axis labels (price values)
+    const numHorizontalGridLines = 5;
+    ctx.strokeStyle = "#AAAAAA";
+    ctx.fillStyle = "#000000";
+    ctx.font = "10px sans-serif";
+    for (let i = 0; i < numHorizontalGridLines; i++) {
+      const factor = i / (numHorizontalGridLines - 1);
+      const yPos = factor * height;
+      const priceValue = maxPrice - factor * (maxPrice - minPrice);
+      ctx.beginPath();
+      ctx.setLineDash([5, 5]);
+      ctx.moveTo(0, yPos);
+      ctx.lineTo(width, yPos);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillText(priceValue.toFixed(2), 5, yPos - 2);
+    }
+
+    // Draw tick marks and labels for visible candles
+    ctx.fillStyle = "#000000";
+    ctx.font = "10px sans-serif";
+    const labelInterval = candles.length > 20 ? 5 : 1;
+    candles.forEach((candle, i) => {
+      const x = newCandleX + (i - (candles.length - 1)) * (candleWidth + candleGap);
+      if (x >= 0 && x <= width && i % labelInterval === 0) {
+        let candleDate = addBusinessDays(chartStartDate, i);
+        let dateStr = `${candleDate.getDate()}/${candleDate.getMonth() + 1}`;
+        ctx.fillText(dateStr, x + candleWidth/2 - 10, height - 2);
+      }
+    });
+  }
+
+  // Function to update the chart: add a candle, then redraw
+  function updateChart() {
+    addNewCandle();
+    drawChart();
+  }
+
+  // Pre-populate the candles array so the chart initially displays a few candlesticks (new candle will appear at center)
+  const initialCandles = 10;
+  while (candles.length < initialCandles) {
+    addNewCandle();
+  }
+
+  // Initial draw
+  drawChart();
+
+  // When the chart is clicked, toggle pause/resume of candle generation
+  const canvas = document.getElementById("chartCanvas");
+  canvas.addEventListener("click", function() {
+    updateChart();
+  });
+  
+  canvas.addEventListener("touchend", function(e) {
+    e.preventDefault();
+    updateChart();
+  });
+
+  document.addEventListener("keydown", function(event) {
+    updateChart();
+  });
+</script>
+</body>
+</html>
