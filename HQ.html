@@ -1,0 +1,5987 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>
+   Top 20 Companies Headquarters Slideshow
+  </title>
+<style>
+   * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .slideshow-container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .slide {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .slide-header {
+            background: white;
+            color: #333;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .slide-header h2 {
+            font-size: 2em;
+            margin-bottom: 0;
+            color: #333;
+        }
+
+        .slide-header .market-cap {
+            font-size: 1.1em;
+            color: #666;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 600px;
+            position: relative;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .date-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .date-display {
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            padding: 20px 32px;
+            border-radius: 12px;
+            font-size: 1.5em;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(1px);
+            text-align: center;
+            line-height: 1.6;
+            pointer-events: all;
+        }
+
+        .date-display .date-text {
+            display: block;
+        }
+
+        .date-display .time-text {
+            display: block;
+            font-size: 1.2em;
+            margin-top: 5px;
+        }
+
+        .date-picker {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 2px solid #333;
+            margin-top: 15px;
+            min-width: 320px;
+        }
+
+        .date-picker.active {
+            display: block;
+        }
+
+        .date-picker-section {
+            margin-bottom: 15px;
+        }
+
+        .date-picker-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .date-picker-section label {
+            display: block;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .date-picker input[type="date"],
+        .date-picker input[type="time"] {
+            padding: 12px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 8px;
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .date-picker input[type="time"]:last-child {
+            margin-bottom: 0;
+        }
+
+        .date-picker input:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        .checkbox-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-label span {
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: white;
+            border-top: 2px solid #f0f0f0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            font-weight: 600;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            background: #555;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .slide-counter {
+            font-size: 1.1em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .address-info {
+            padding: 20px 30px;
+            background: white;
+        }
+
+        .address-info p {
+            font-size: 1.1em;
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .address-info strong {
+            color: #555;
+        }
+
+        .dots-container {
+            text-align: center;
+            padding: 15px 0;
+            background: white;
+        }
+
+        .dot {
+            height: 12px;
+            width: 12px;
+            margin: 0 5px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: #333;
+            transform: scale(1.2);
+        }
+
+        @media (max-width: 768px) {
+            .slide-header h2 {
+                font-size: 1.5em;
+            }
+
+            .slide-header {
+                padding: 20px 15px;
+            }
+
+            .map-container {
+                height: 400px;
+            }
+
+            .controls {
+                padding: 12px 15px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+
+            .slide-counter {
+                font-size: 1em;
+            }
+
+            .address-info {
+                padding: 15px;
+            }
+
+            .address-info p {
+                font-size: 1em;
+            }
+
+            .date-display {
+                font-size: 1.2em;
+                padding: 15px 25px;
+            }
+
+            .date-picker {
+                padding: 15px;
+                min-width: 250px;
+            }
+
+            .date-picker input[type="date"],
+            .date-picker input[type="time"] {
+                padding: 12px;
+                font-size: 1.1em;
+                min-height: 48px;
+            }
+        }
+  
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9em;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .save-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .save-btn.saved {
+            background: #6c757d;
+        }
+
+        .saved-list-container {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            width: 320px;
+            max-height: 80vh;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid #333;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .saved-list-container.visible {
+            display: flex;
+        }
+
+        .saved-list-header {
+            padding: 15px 20px;
+            background: #333;
+            color: white;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-list-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+        }
+
+        .close-list-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .saved-list-content {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .saved-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #333;
+        }
+
+        .saved-item-info {
+            margin-bottom: 5px;
+        }
+
+        .saved-item-ticker {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+            display: block;
+        }
+
+        .saved-item-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.85em;
+            word-break: break-all;
+            display: block;
+        }
+
+        .saved-item-link:hover {
+            text-decoration: underline;
+        }
+
+        .remove-item-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .remove-item-btn:hover {
+            background: #c82333;
+        }
+
+        .saved-list-actions {
+            padding: 15px;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .copy-all-btn, .clear-all-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .copy-all-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .copy-all-btn:hover {
+            background: #0056b3;
+        }
+
+        .clear-all-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .clear-all-btn:hover {
+            background: #c82333;
+        }
+
+        .toggle-list-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 60px;
+            height: 60px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5em;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-list-btn:hover {
+            transform: scale(1.1);
+            background: #555;
+        }
+
+        .toggle-list-btn .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .empty-list-message {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Saved Companies List -->
+<div class="saved-list-container" id="savedListContainer">
+<div class="saved-list-header">
+<h3>📋 Saved Companies</h3>
+<button class="close-list-btn" onclick="toggleSavedList()">×</button>
+</div>
+<div class="saved-list-content" id="savedListContent">
+<p class="empty-list-message">No companies saved yet</p>
+</div>
+<div class="saved-list-actions">
+<button class="copy-all-btn" onclick="copyAllCompanies()">📋 Copy All</button>
+<button class="clear-all-btn" onclick="clearAllCompanies()">🗑️ Clear</button>
+</div>
+</div>
+<!-- Toggle Button -->
+<button class="toggle-list-btn" id="toggleListBtn" onclick="toggleSavedList()">
+        📋
+        <span class="badge" id="savedCount" style="display: none;">0</span>
+</button>
+<div class="slideshow-container">
+<!-- Slide 1: Apple -->
+<div class="slide" data-company="Apple Inc." data-ticker="AAPL">
+<div class="slide-header">
+<h2>
+      🏢 Apple Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Apple%20Inc.%20One%20Apple%20Park%20Way%2C%20Cupertino%2C%20CA%2095014%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      One Apple Park Way, Cupertino, CA 95014, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Cupertino, California
+     </p>
+</div>
+</div>
+<!-- Slide 2: Microsoft -->
+<div class="slide" data-company="Microsoft Corporation" data-ticker="MSFT">
+<div class="slide-header">
+<h2>
+      🏢 Microsoft Corporation
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Microsoft%20Corporation%20One%20Microsoft%20Way%2C%20Redmond%2C%20WA%2098052%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      One Microsoft Way, Redmond, WA 98052, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Redmond, Washington
+     </p>
+</div>
+</div>
+<!-- Slide 3: NVIDIA -->
+<div class="slide" data-company="NVIDIA Corporation" data-ticker="NVDA">
+<div class="slide-header">
+<h2>
+      🏢 NVIDIA Corporation
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20NVIDIA%20Corporation%202788%20San%20Tomas%20Expressway%2C%20Santa%20Clara%2C%20CA%2095051%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      2788 San Tomas Expressway, Santa Clara, CA 95051, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Santa Clara, California
+     </p>
+</div>
+</div>
+<!-- Slide 4: Alphabet (Google) -->
+<div class="slide" data-company="Alphabet Inc. (Google)" data-ticker="GOOGL">
+<div class="slide-header">
+<h2>
+      🏢 Alphabet Inc. (Google)
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Alphabet%20Inc.%20%28Google%29%201600%20Amphitheatre%20Parkway%2C%20Mountain%20View%2C%20CA%2094043%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1600 Amphitheatre Parkway, Mountain View, CA 94043, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Mountain View, California
+     </p>
+</div>
+</div>
+<!-- Slide 5: Amazon -->
+<div class="slide" data-company="Amazon.com, Inc." data-ticker="AMZN">
+<div class="slide-header">
+<h2>
+      🏢 Amazon.com, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Amazon.com%2C%20Inc.%20410%20Terry%20Avenue%20North%2C%20Seattle%2C%20WA%2098109%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      410 Terry Avenue North, Seattle, WA 98109, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Seattle, Washington
+     </p>
+</div>
+</div>
+<!-- Slide 6: Meta (Facebook) -->
+<div class="slide" data-company="Meta Platforms, Inc. (Facebook)" data-ticker="META">
+<div class="slide-header">
+<h2>
+      🏢 Meta Platforms, Inc. (Facebook)
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Meta%20Platforms%2C%20Inc.%20%28Facebook%29%201%20Hacker%20Way%2C%20Menlo%20Park%2C%20CA%2094025%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1 Hacker Way, Menlo Park, CA 94025, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Menlo Park, California
+     </p>
+</div>
+</div>
+<!-- Slide 7: Tesla -->
+<div class="slide" data-company="Tesla, Inc." data-ticker="TSLA">
+<div class="slide-header">
+<h2>
+      🏢 Tesla, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Tesla%2C%20Inc.%201%20Tesla%20Road%2C%20Austin%2C%20TX%2078725%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1 Tesla Road, Austin, TX 78725, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Austin, Texas
+     </p>
+</div>
+</div>
+<!-- Slide 8: Berkshire Hathaway -->
+<div class="slide" data-company="Berkshire Hathaway Inc." data-ticker="BRK.B">
+<div class="slide-header">
+<h2>
+      🏢 Berkshire Hathaway Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Berkshire%20Hathaway%20Inc.%203555%20Farnam%20Street%2C%20Omaha%2C%20NE%2068131%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      3555 Farnam Street, Omaha, NE 68131, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Omaha, Nebraska
+     </p>
+</div>
+</div>
+<!-- Slide 9: Eli Lilly -->
+<div class="slide" data-company="Eli Lilly and Company" data-ticker="LLY">
+<div class="slide-header">
+<h2>
+      🏢 Eli Lilly and Company
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Eli%20Lilly%20and%20Company%20Lilly%20Corporate%20Center%2C%20Indianapolis%2C%20IN%2046285%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      Lilly Corporate Center, Indianapolis, IN 46285, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Indianapolis, Indiana
+     </p>
+</div>
+</div>
+<!-- Slide 10: Broadcom -->
+<div class="slide" data-company="Broadcom Inc." data-ticker="AVGO">
+<div class="slide-header">
+<h2>
+      🏢 Broadcom Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Broadcom%20Inc.%201320%20Ridder%20Park%20Drive%2C%20San%20Jose%2C%20CA%2095131%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1320 Ridder Park Drive, San Jose, CA 95131, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      San Jose, California
+     </p>
+</div>
+</div>
+<!-- Slide 11: JPMorgan Chase -->
+<div class="slide" data-company="JPMorgan Chase &amp; Co." data-ticker="JPM">
+<div class="slide-header">
+<h2>
+      🏢 JPMorgan Chase &amp; Co.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20JPMorgan%20Chase%20%26%20Co.%20383%20Madison%20Avenue%2C%20New%20York%2C%20NY%2010179%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      383 Madison Avenue, New York, NY 10179, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 12: Visa -->
+<div class="slide" data-company="Visa Inc." data-ticker="V">
+<div class="slide-header">
+<h2>
+      🏢 Visa Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Visa%20Inc.%20900%20Metro%20Center%20Boulevard%2C%20Foster%20City%2C%20CA%2094404%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      900 Metro Center Boulevard, Foster City, CA 94404, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Foster City, California
+     </p>
+</div>
+</div>
+<!-- Slide 13: Walmart -->
+<div class="slide" data-company="Walmart Inc." data-ticker="WMT">
+<div class="slide-header">
+<h2>
+      🏢 Walmart Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Walmart%20Inc.%20702%20SW%208th%20Street%2C%20Bentonville%2C%20AR%2072716%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      702 SW 8th Street, Bentonville, AR 72716, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Bentonville, Arkansas
+     </p>
+</div>
+</div>
+<!-- Slide 14: UnitedHealth Group -->
+<div class="slide" data-company="UnitedHealth Group Inc." data-ticker="UNH">
+<div class="slide-header">
+<h2>
+      🏢 UnitedHealth Group Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20UnitedHealth%20Group%20Inc.%20UnitedHealth%20Group%20Center%2C%209900%20Bren%20Road%20East%2C%20Minnetonka%2C%20MN%2055343%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      UnitedHealth Group Center, 9900 Bren Road East, Minnetonka, MN 55343, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Minnetonka, Minnesota
+     </p>
+</div>
+</div>
+<!-- Slide 15: Taiwan Semiconductor -->
+<div class="slide" data-company="Taiwan Semiconductor Manufacturing Company (TSMC)" data-ticker="TSM">
+<div class="slide-header">
+<h2>
+      🏢 Taiwan Semiconductor Manufacturing Company (TSMC)
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Taiwan%20Semiconductor%20Manufacturing%20Company%20%28TSMC%29%20No.%208%2C%20Li-Hsin%20Road%206%2C%20Hsinchu%20Science%20Park%2C%20Hsinchu%2C%20Taiwan%2030078&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      No. 8, Li-Hsin Road 6, Hsinchu Science Park, Hsinchu, Taiwan 30078
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Hsinchu, Taiwan
+     </p>
+</div>
+</div>
+<!-- Slide 16: Johnson & Johnson -->
+<div class="slide" data-company="Johnson &amp; Johnson" data-ticker="JNJ">
+<div class="slide-header">
+<h2>
+      🏢 Johnson &amp; Johnson
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Johnson%20%26%20Johnson%20One%20Johnson%20%26%20Johnson%20Plaza%2C%20New%20Brunswick%2C%20NJ%2008933%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      One Johnson &amp; Johnson Plaza, New Brunswick, NJ 08933, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New Brunswick, New Jersey
+     </p>
+</div>
+</div>
+<!-- Slide 17: Mastercard -->
+<div class="slide" data-company="Mastercard Incorporated" data-ticker="MA">
+<div class="slide-header">
+<h2>
+      🏢 Mastercard Incorporated
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Mastercard%20Incorporated%202000%20Purchase%20Street%2C%20Purchase%2C%20NY%2010577%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      2000 Purchase Street, Purchase, NY 10577, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Purchase, New York
+     </p>
+</div>
+</div>
+<!-- Slide 18: Procter & Gamble -->
+<div class="slide" data-company="The Procter &amp; Gamble Company" data-ticker="PG">
+<div class="slide-header">
+<h2>
+      🏢 The Procter &amp; Gamble Company
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20The%20Procter%20%26%20Gamble%20Company%20One%20Procter%20%26%20Gamble%20Plaza%2C%20Cincinnati%2C%20OH%2045202%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      One Procter &amp; Gamble Plaza, Cincinnati, OH 45202, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Cincinnati, Ohio
+     </p>
+</div>
+</div>
+<!-- Slide 19: Oracle -->
+<div class="slide" data-company="Oracle Corporation" data-ticker="ORCL">
+<div class="slide-header">
+<h2>
+      🏢 Oracle Corporation
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Oracle%20Corporation%202300%20Oracle%20Way%2C%20Austin%2C%20TX%2078741%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      2300 Oracle Way, Austin, TX 78741, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Austin, Texas
+     </p>
+</div>
+</div>
+<!-- Slide 20: Costco -->
+<div class="slide" data-company="Costco Wholesale Corporation" data-ticker="COST">
+<div class="slide-header">
+<h2>
+      🏢 Costco Wholesale Corporation
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Costco%20Wholesale%20Corporation%20999%20Lake%20Drive%2C%20Issaquah%2C%20WA%2098027%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      999 Lake Drive, Issaquah, WA 98027, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Issaquah, Washington
+     </p>
+</div>
+</div>
+<!-- Slide 21-74 would continue here with the same structure... -->
+<!-- For brevity, I'll add a few more slides and note that the rest follow the same pattern -->
+<!-- Slide 21: AMD -->
+<div class="slide" data-company="Advanced Micro Devices, Inc." data-ticker="AMD">
+<div class="slide-header">
+<h2>
+      🏢 Advanced Micro Devices, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Advanced%20Micro%20Devices%2C%20Inc.%202485%20Augustine%20Drive%2C%20Santa%20Clara%2C%20CA%2095054%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      2485 Augustine Drive, Santa Clara, CA 95054, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Santa Clara, California
+     </p>
+</div>
+</div>
+<!-- Slide 22: Costco -->
+<!-- Slide 23: AbbVie -->
+<div class="slide" data-company="AbbVie Inc." data-ticker="ABBV">
+<div class="slide-header">
+<h2>
+      🏢 AbbVie Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20AbbVie%20Inc.%201%20North%20Waukegan%20Road%2C%20North%20Chicago%2C%20IL%2060064%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1 North Waukegan Road, North Chicago, IL 60064, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      North Chicago, Illinois
+     </p>
+</div>
+</div>
+<!-- Slide 24: Bank of America -->
+<div class="slide" data-company="Bank of America Corporation" data-ticker="BAC">
+<div class="slide-header">
+<h2>
+      🏢 Bank of America Corporation
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Bank%20of%20America%20Corporation%20Bank%20of%20America%20Corporate%20Center%2C%20100%20North%20Tryon%20Street%2C%20Charlotte%2C%20NC%2028255%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      Bank of America Corporate Center, 100 North Tryon Street, Charlotte, NC 28255, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Charlotte, North Carolina
+     </p>
+</div>
+</div>
+<!-- Slide 25: Home Depot -->
+<div class="slide" data-company="The Home Depot, Inc." data-ticker="HD">
+<div class="slide-header">
+<h2>
+      🏢 The Home Depot, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20The%20Home%20Depot%2C%20Inc.%202455%20Paces%20Ferry%20Road%20SE%2C%20Atlanta%2C%20GA%2030339%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      2455 Paces Ferry Road SE, Atlanta, GA 30339, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Atlanta, Georgia
+     </p>
+</div>
+</div>
+<!-- Slide 26: Procter & Gamble -->
+<!-- Slide 27: General Electric -->
+<div class="slide" data-company="General Electric Company" data-ticker="GE">
+<div class="slide-header">
+<h2>
+      🏢 General Electric Company
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20General%20Electric%20Company%205%20Necco%20Street%2C%20Boston%2C%20MA%2002210%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      5 Necco Street, Boston, MA 02210, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Boston, Massachusetts
+     </p>
+</div>
+</div>
+<!-- Slide 28: Chevron -->
+<div class="slide" data-company="Chevron Corporation" data-ticker="CVX">
+<div class="slide-header">
+<h2>
+      🏢 Chevron Corporation
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Chevron%20Corporation%206001%20Bollinger%20Canyon%20Road%2C%20San%20Ramon%2C%20CA%2094583%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      6001 Bollinger Canyon Road, San Ramon, CA 94583, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      San Ramon, California
+     </p>
+</div>
+</div>
+<!-- Slide 29: UnitedHealth Group -->
+<div class="slide" data-company="UnitedHealth Group Incorporated" data-ticker="UNH">
+<div class="slide-header">
+<h2>
+      🏢 UnitedHealth Group Incorporated
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20UnitedHealth%20Group%20Incorporated%20UnitedHealth%20Group%20Center%2C%209900%20Bren%20Road%20East%2C%20Minnetonka%2C%20MN%2055343%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      UnitedHealth Group Center, 9900 Bren Road East, Minnetonka, MN 55343, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Minnetonka, Minnesota
+     </p>
+</div>
+</div>
+<!-- Slide 30: Coca-Cola -->
+<div class="slide" data-company="The Coca-Cola Company" data-ticker="KO">
+<div class="slide-header">
+<h2>
+      🏢 The Coca-Cola Company
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20The%20Coca-Cola%20Company%20One%20Coca-Cola%20Plaza%2C%20Atlanta%2C%20GA%2030313%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      One Coca-Cola Plaza, Atlanta, GA 30313, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Atlanta, Georgia
+     </p>
+</div>
+</div>
+<!-- Slide 31: IBM -->
+<div class="slide" data-company="International Business Machines Corporation" data-ticker="IBM">
+<div class="slide-header">
+<h2>
+      🏢 International Business Machines Corporation
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20International%20Business%20Machines%20Corporation%201%20New%20Orchard%20Road%2C%20Armonk%2C%20NY%2010504%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1 New Orchard Road, Armonk, NY 10504, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Armonk, New York
+     </p>
+</div>
+</div>
+<!-- Slide 32: Cisco -->
+<div class="slide" data-company="Cisco Systems, Inc." data-ticker="CSCO">
+<div class="slide-header">
+<h2>
+      🏢 Cisco Systems, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Cisco%20Systems%2C%20Inc.%20170%20West%20Tasman%20Drive%2C%20San%20Jose%2C%20CA%2095134%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      170 West Tasman Drive, San Jose, CA 95134, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      San Jose, California
+     </p>
+</div>
+</div>
+<!-- Slide 33: Caterpillar -->
+<div class="slide" data-company="Caterpillar Inc." data-ticker="CAT">
+<div class="slide-header">
+<h2>
+      🏢 Caterpillar Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Caterpillar%20Inc.%20510%20Lake%20Cook%20Road%2C%20Deerfield%2C%20IL%2060015%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      510 Lake Cook Road, Deerfield, IL 60015, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Deerfield, Illinois
+     </p>
+</div>
+</div>
+<!-- Slide 34: Wells Fargo -->
+<div class="slide" data-company="Wells Fargo &amp; Company" data-ticker="WFC">
+<div class="slide-header">
+<h2>
+      🏢 Wells Fargo &amp; Company
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Wells%20Fargo%20%26%20Company%20420%20Montgomery%20Street%2C%20San%20Francisco%2C%20CA%2094104%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      420 Montgomery Street, San Francisco, CA 94104, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      San Francisco, California
+     </p>
+</div>
+</div>
+<!-- Slide 35: Morgan Stanley -->
+<div class="slide" data-company="Morgan Stanley" data-ticker="MS">
+<div class="slide-header">
+<h2>
+      🏢 Morgan Stanley
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Morgan%20Stanley%201585%20Broadway%2C%20New%20York%2C%20NY%2010036%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1585 Broadway, New York, NY 10036, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 36: Goldman Sachs -->
+<div class="slide" data-company="The Goldman Sachs Group, Inc." data-ticker="GS">
+<div class="slide-header">
+<h2>
+      🏢 The Goldman Sachs Group, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20The%20Goldman%20Sachs%20Group%2C%20Inc.%20200%20West%20Street%2C%20New%20York%2C%20NY%2010282%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      200 West Street, New York, NY 10282, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 37: Micron Technology -->
+<div class="slide" data-company="Micron Technology, Inc." data-ticker="MU">
+<div class="slide-header">
+<h2>
+      🏢 Micron Technology, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Micron%20Technology%2C%20Inc.%208000%20South%20Federal%20Way%2C%20Boise%2C%20ID%2083716%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      8000 South Federal Way, Boise, ID 83716, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Boise, Idaho
+     </p>
+</div>
+</div>
+<!-- Slide 38: American Express -->
+<div class="slide" data-company="American Express Company" data-ticker="AXP">
+<div class="slide-header">
+<h2>
+      🏢 American Express Company
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20American%20Express%20Company%20200%20Vesey%20Street%2C%20New%20York%2C%20NY%2010285%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      200 Vesey Street, New York, NY 10285, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 39: Salesforce -->
+<div class="slide" data-company="Salesforce, Inc." data-ticker="CRM">
+<div class="slide-header">
+<h2>
+      🏢 Salesforce, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Salesforce%2C%20Inc.%20Salesforce%20Tower%2C%20415%20Mission%20Street%2C%20San%20Francisco%2C%20CA%2094105%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      Salesforce Tower, 415 Mission Street, San Francisco, CA 94105, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      San Francisco, California
+     </p>
+</div>
+</div>
+<!-- Slide 40: T-Mobile -->
+<div class="slide" data-company="T-Mobile US, Inc." data-ticker="TMUS">
+<div class="slide-header">
+<h2>
+      🏢 T-Mobile US, Inc.
+     </h2>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20T-Mobile%20US%2C%20Inc.%2012920%20SE%2038th%20Street%2C%20Bellevue%2C%20WA%2098006%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      12920 SE 38th Street, Bellevue, WA 98006, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Bellevue, Washington
+     </p>
+</div>
+</div>
+<!-- Slide 41: RTX Corporation -->
+<div class="slide" data-company="RTX Corporation" data-ticker="RTX">
+<div class="slide-header">
+<h2>
+      🏢 RTX Corporation
+     </h2>
+<div class="market-cap">
+      Market Cap: $239.10B | Rank: #41
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20RTX%20Corporation%201000%20Wilson%20Boulevard%2C%20Arlington%2C%20VA%2022209%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1000 Wilson Boulevard, Arlington, VA 22209, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Arlington, Virginia
+     </p>
+</div>
+</div>
+<!-- Slide 42: Philip Morris International -->
+<div class="slide" data-company="Philip Morris International Inc." data-ticker="PM">
+<div class="slide-header">
+<h2>
+      🏢 Philip Morris International Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $228.75B | Rank: #42
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Philip%20Morris%20International%20Inc.%20120%20Park%20Avenue%2C%20New%20York%2C%20NY%2010017%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      120 Park Avenue, New York, NY 10017, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 43: Abbott Laboratories -->
+<div class="slide" data-company="Abbott Laboratories" data-ticker="ABT">
+<div class="slide-header">
+<h2>
+      🏢 Abbott Laboratories
+     </h2>
+<div class="market-cap">
+      Market Cap: $217.87B | Rank: #43
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Abbott%20Laboratories%20100%20Abbott%20Park%20Road%2C%20Abbott%20Park%2C%20IL%2060064%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      100 Abbott Park Road, Abbott Park, IL 60064, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Abbott Park, Illinois
+     </p>
+</div>
+</div>
+<!-- Slide 44: McDonald's Corporation -->
+<div class="slide" data-company="McDonald's Corporation" data-ticker="MCD">
+<div class="slide-header">
+<h2>
+      🏢 McDonald's Corporation
+     </h2>
+<div class="market-cap">
+      Market Cap: $216.96B | Rank: #44
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20McDonald%27s%20Corporation%20110%20North%20Carpenter%20Street%2C%20Chicago%2C%20IL%2060607%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      110 North Carpenter Street, Chicago, IL 60607, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Chicago, Illinois
+     </p>
+</div>
+</div>
+<!-- Slide 45: Merck & Co., Inc. -->
+<div class="slide" data-company="Merck &amp; Co., Inc." data-ticker="MRK">
+<div class="slide-header">
+<h2>
+      🏢 Merck &amp; Co., Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $213.71B | Rank: #45
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Merck%20%26%20Co.%2C%20Inc.%20126%20East%20Lincoln%20Avenue%2C%20Rahway%2C%20NJ%2007065%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      126 East Lincoln Avenue, Rahway, NJ 07065, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Rahway, New Jersey
+     </p>
+</div>
+</div>
+<!-- Slide 46: AppLovin Corporation -->
+<div class="slide" data-company="AppLovin Corporation" data-ticker="APP">
+<div class="slide-header">
+<h2>
+      🏢 AppLovin Corporation
+     </h2>
+<div class="market-cap">
+      Market Cap: $211.96B | Rank: #46
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20AppLovin%20Corporation%201100%20Page%20Mill%20Road%2C%20Palo%20Alto%2C%20CA%2094304%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1100 Page Mill Road, Palo Alto, CA 94304, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Palo Alto, California
+     </p>
+</div>
+</div>
+<!-- Slide 47: Thermo Fisher Scientific Inc. -->
+<div class="slide" data-company="Thermo Fisher Scientific Inc." data-ticker="TMO">
+<div class="slide-header">
+<h2>
+      🏢 Thermo Fisher Scientific Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $211.05B | Rank: #47
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Thermo%20Fisher%20Scientific%20Inc.%20168%20Third%20Avenue%2C%20Waltham%2C%20MA%2002451%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      168 Third Avenue, Waltham, MA 02451, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Waltham, Massachusetts
+     </p>
+</div>
+</div>
+<!-- Slide 48: Lam Research Corporation -->
+<div class="slide" data-company="Lam Research Corporation" data-ticker="LRCX">
+<div class="slide-header">
+<h2>
+      🏢 Lam Research Corporation
+     </h2>
+<div class="market-cap">
+      Market Cap: $204.21B | Rank: #48
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Lam%20Research%20Corporation%204650%20Cushing%20Parkway%2C%20Fremont%2C%20CA%2094538%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      4650 Cushing Parkway, Fremont, CA 94538, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Fremont, California
+     </p>
+</div>
+</div>
+<!-- Slide 49: Linde plc -->
+<div class="slide" data-company="Linde plc" data-ticker="LIN">
+<div class="slide-header">
+<h2>
+      🏢 Linde plc
+     </h2>
+<div class="market-cap">
+      Market Cap: $203.62B | Rank: #49
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Linde%20plc%2010%20Riverview%20Drive%2C%20Danbury%2C%20CT%2006810%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      10 Riverview Drive, Danbury, CT 06810, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Danbury, Connecticut
+     </p>
+</div>
+</div>
+<!-- Slide 50: The Walt Disney Company -->
+<div class="slide" data-company="The Walt Disney Company" data-ticker="DIS">
+<div class="slide-header">
+<h2>
+      🏢 The Walt Disney Company
+     </h2>
+<div class="market-cap">
+      Market Cap: $202.56B | Rank: #50
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20The%20Walt%20Disney%20Company%20500%20South%20Buena%20Vista%20Street%2C%20Burbank%2C%20CA%2091521%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      500 South Buena Vista Street, Burbank, CA 91521, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Burbank, California
+     </p>
+</div>
+</div>
+<!-- Slide 51: PepsiCo, Inc. -->
+<div class="slide" data-company="PepsiCo, Inc." data-ticker="PEP">
+<div class="slide-header">
+<h2>
+      🏢 PepsiCo, Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $202.17B | Rank: #51
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20PepsiCo%2C%20Inc.%20700%20Anderson%20Hill%20Road%2C%20Purchase%2C%20NY%2010577%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      700 Anderson Hill Road, Purchase, NY 10577, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Purchase, New York
+     </p>
+</div>
+</div>
+<!-- Slide 52: Arista Networks Inc -->
+<div class="slide" data-company="Arista Networks Inc" data-ticker="ANET">
+<div class="slide-header">
+<h2>
+      🏢 Arista Networks Inc
+     </h2>
+<div class="market-cap">
+      Market Cap: $201.63B | Rank: #52
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Arista%20Networks%20Inc%205453%20Great%20America%20Parkway%2C%20Santa%20Clara%2C%20CA%2095054%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      5453 Great America Parkway, Santa Clara, CA 95054, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Santa Clara, California
+     </p>
+</div>
+</div>
+<!-- Slide 53: Uber Technologies, Inc. -->
+<div class="slide" data-company="Uber Technologies, Inc." data-ticker="UBER">
+<div class="slide-header">
+<h2>
+      🏢 Uber Technologies, Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $200.35B | Rank: #53
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Uber%20Technologies%2C%20Inc.%201515%203rd%20Street%2C%20San%20Francisco%2C%20CA%2094158%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1515 3rd Street, San Francisco, CA 94158, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      San Francisco, California
+     </p>
+</div>
+</div>
+<!-- Slide 54: ServiceNow, Inc. -->
+<div class="slide" data-company="ServiceNow, Inc." data-ticker="NOW">
+<div class="slide-header">
+<h2>
+      🏢 ServiceNow, Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $196.18B | Rank: #54
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20ServiceNow%2C%20Inc.%202225%20Lawson%20Lane%2C%20Santa%20Clara%2C%20CA%2095054%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      2225 Lawson Lane, Santa Clara, CA 95054, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Santa Clara, California
+     </p>
+</div>
+</div>
+<!-- Slide 55: Intel Corporation -->
+<div class="slide" data-company="Intel Corporation" data-ticker="INTC">
+<div class="slide-header">
+<h2>
+      🏢 Intel Corporation
+     </h2>
+<div class="market-cap">
+      Market Cap: $194.98B | Rank: #55
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Intel%20Corporation%202200%20Mission%20College%20Boulevard%2C%20Santa%20Clara%2C%20CA%2095054%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      2200 Mission College Boulevard, Santa Clara, CA 95054, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Santa Clara, California
+     </p>
+</div>
+</div>
+<!-- Slide 56: QUALCOMM Incorporated -->
+<div class="slide" data-company="QUALCOMM Incorporated" data-ticker="QCOM">
+<div class="slide-header">
+<h2>
+      🏢 QUALCOMM Incorporated
+     </h2>
+<div class="market-cap">
+      Market Cap: $191.09B | Rank: #56
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20QUALCOMM%20Incorporated%205775%20Morehouse%20Drive%2C%20San%20Diego%2C%20CA%2092121%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      5775 Morehouse Drive, San Diego, CA 92121, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      San Diego, California
+     </p>
+</div>
+</div>
+<!-- Slide 57: Intuitive Surgical, Inc. -->
+<div class="slide" data-company="Intuitive Surgical, Inc." data-ticker="ISRG">
+<div class="slide-header">
+<h2>
+      🏢 Intuitive Surgical, Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $189.91B | Rank: #57
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Intuitive%20Surgical%2C%20Inc.%201020%20Kifer%20Road%2C%20Sunnyvale%2C%20CA%2094086%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1020 Kifer Road, Sunnyvale, CA 94086, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Sunnyvale, California
+     </p>
+</div>
+</div>
+<!-- Slide 58: Applied Materials, Inc. -->
+<div class="slide" data-company="Applied Materials, Inc." data-ticker="AMAT">
+<div class="slide-header">
+<h2>
+      🏢 Applied Materials, Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $189.70B | Rank: #58
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Applied%20Materials%2C%20Inc.%203050%20Bowers%20Avenue%2C%20Santa%20Clara%2C%20CA%2095054%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      3050 Bowers Avenue, Santa Clara, CA 95054, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Santa Clara, California
+     </p>
+</div>
+</div>
+<!-- Slide 59: Intuit Inc. -->
+<div class="slide" data-company="Intuit Inc." data-ticker="INTU">
+<div class="slide-header">
+<h2>
+      🏢 Intuit Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $184.68B | Rank: #59
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Intuit%20Inc.%202700%20Coast%20Avenue%2C%20Mountain%20View%2C%20CA%2094043%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      2700 Coast Avenue, Mountain View, CA 94043, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Mountain View, California
+     </p>
+</div>
+</div>
+<!-- Slide 60: Blackstone Inc. -->
+<div class="slide" data-company="Blackstone Inc." data-ticker="BX">
+<div class="slide-header">
+<h2>
+      🏢 Blackstone Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $183.90B | Rank: #60
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Blackstone%20Inc.%20345%20Park%20Avenue%2C%20New%20York%2C%20NY%2010154%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      345 Park Avenue, New York, NY 10154, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 61: BlackRock, Inc. -->
+<div class="slide" data-company="BlackRock, Inc." data-ticker="BLK">
+<div class="slide-header">
+<h2>
+      🏢 BlackRock, Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $180.25B | Rank: #61
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20BlackRock%2C%20Inc.%2050%20Hudson%20Yards%2C%20New%20York%2C%20NY%2010001%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      50 Hudson Yards, New York, NY 10001, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 62: Citigroup Inc. -->
+<div class="slide" data-company="Citigroup Inc." data-ticker="C">
+<div class="slide-header">
+<h2>
+      🏢 Citigroup Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $180.13B | Rank: #62
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Citigroup%20Inc.%20388%20Greenwich%20Street%2C%20New%20York%2C%20NY%2010013%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      388 Greenwich Street, New York, NY 10013, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 63: AT&T Inc. -->
+<div class="slide" data-company="AT&amp;T Inc." data-ticker="T">
+<div class="slide-header">
+<h2>
+      🏢 AT&amp;T Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $177.01B | Rank: #63
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20AT%26T%20Inc.%20208%20S.%20Akard%20Street%2C%20Dallas%2C%20TX%2075202%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      208 S. Akard Street, Dallas, TX 75202, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Dallas, Texas
+     </p>
+</div>
+</div>
+<!-- Slide 64: The Charles Schwab Corporation -->
+<div class="slide" data-company="The Charles Schwab Corporation" data-ticker="SCHW">
+<div class="slide-header">
+<h2>
+      🏢 The Charles Schwab Corporation
+     </h2>
+<div class="market-cap">
+      Market Cap: $173.14B | Rank: #64
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20The%20Charles%20Schwab%20Corporation%203000%20Schwab%20Way%2C%20Westlake%2C%20TX%2076262%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      3000 Schwab Way, Westlake, TX 76262, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Westlake, Texas
+     </p>
+</div>
+</div>
+<!-- Slide 65: NextEra Energy, Inc. -->
+<div class="slide" data-company="NextEra Energy, Inc." data-ticker="NEE">
+<div class="slide-header">
+<h2>
+      🏢 NextEra Energy, Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $171.59B | Rank: #65
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20NextEra%20Energy%2C%20Inc.%20700%20Universe%20Boulevard%2C%20Juno%20Beach%2C%20FL%2033408%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      700 Universe Boulevard, Juno Beach, FL 33408, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Juno Beach, Florida
+     </p>
+</div>
+</div>
+<!-- Slide 66: Amphenol Corporation -->
+<div class="slide" data-company="Amphenol Corporation" data-ticker="APH">
+<div class="slide-header">
+<h2>
+      🏢 Amphenol Corporation
+     </h2>
+<div class="market-cap">
+      Market Cap: $169.73B | Rank: #66
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Amphenol%20Corporation%20358%20Hall%20Avenue%2C%20Wallingford%2C%20CT%2006492%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      358 Hall Avenue, Wallingford, CT 06492, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Wallingford, Connecticut
+     </p>
+</div>
+</div>
+<!-- Slide 67: Booking Holdings Inc. -->
+<div class="slide" data-company="Booking Holdings Inc." data-ticker="BKNG">
+<div class="slide-header">
+<h2>
+      🏢 Booking Holdings Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $169.14B | Rank: #67
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Booking%20Holdings%20Inc.%20800%20Connecticut%20Avenue%2C%20Norwalk%2C%20CT%2006854%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      800 Connecticut Avenue, Norwalk, CT 06854, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Norwalk, Connecticut
+     </p>
+</div>
+</div>
+<!-- Slide 68: Verizon Communications Inc. -->
+<div class="slide" data-company="Verizon Communications Inc." data-ticker="VZ">
+<div class="slide-header">
+<h2>
+      🏢 Verizon Communications Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $166.25B | Rank: #68
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20Verizon%20Communications%20Inc.%201095%20Avenue%20of%20the%20Americas%2C%20New%20York%2C%20NY%2010036%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      1095 Avenue of the Americas, New York, NY 10036, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      New York City, New York
+     </p>
+</div>
+</div>
+<!-- Slide 69: KLA Corporation -->
+<div class="slide" data-company="KLA Corporation" data-ticker="KLAC">
+<div class="slide-header">
+<h2>
+      🏢 KLA Corporation
+     </h2>
+<div class="market-cap">
+      Market Cap: $161.89B | Rank: #69
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20KLA%20Corporation%20One%20Technology%20Drive%2C%20Milpitas%2C%20CA%2095035%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      One Technology Drive, Milpitas, CA 95035, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Milpitas, California
+     </p>
+</div>
+</div>
+<!-- Slide 70: GE Vernova Inc. -->
+<div class="slide" data-company="GE Vernova Inc." data-ticker="GEV">
+<div class="slide-header">
+<h2>
+      🏢 GE Vernova Inc.
+     </h2>
+<div class="market-cap">
+      Market Cap: $159.89B | Rank: #70
+     </div>
+</div>
+<div class="map-container">
+<div class="date-overlay">
+<div class="date-display">
+<span class="date-text">
+</span>
+<span class="time-text">
+</span>
+</div>
+<div class="date-picker">
+<div class="date-picker-section">
+<label>
+         Start Date &amp; Time:
+        </label>
+<input class="start-date" type="date"/>
+<input class="start-time" type="time"/>
+</div>
+<div class="date-picker-section">
+<label>
+         End Date &amp; Time:
+        </label>
+<input class="end-date" type="date"/>
+<input class="end-time" type="time"/>
+</div>
+<div class="checkbox-section">
+<label class="checkbox-label">
+<input type="checkbox" class="hide-23-checkbox" checked/>
+<span>Ascunde ora 23:00 de pe hartă (la intervale)</span>
+</label>
+</div>
+</div>
+</div>
+<iframe allowfullscreen="" loading="lazy" src="https://maps.google.com/maps?q=%F0%9F%8F%A2%20GE%20Vernova%20Inc.%20200%20Cambridge%20Park%20Drive%2C%20Cambridge%2C%20MA%2002140%2C%20USA&amp;output=embed&amp;t=k&amp;z=18">
+</iframe>
+</div>
+<div class="controls">
+<button class="btn" onclick="changeSlide(-1)">
+      ⬅ Previous
+     </button>
+<span class="slide-counter">
+<span class="current-slide">
+       1
+      </span>
+      /
+      <span class="total-slides">
+       68
+      </span>
+</span>
+<button class="btn save-btn" onclick="saveCompany(this)">💾 Save</button><button class="btn" onclick="changeSlide(1)">
+      Next ➡
+     </button>
+</div>
+<div class="address-info">
+<p>
+<strong>
+       📍 Address:
+      </strong>
+      200 Cambridge Park Drive, Cambridge, MA 02140, USA
+     </p>
+<p>
+<strong>
+       🌐 Location:
+      </strong>
+      Cambridge, Massachusetts
+     </p>
+</div>
+</div>
+<!-- Dots Navigation -->
+<div class="dots-container" id="dots-container">
+</div>
+</div>
+<script>
+   let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        // Global date/time state
+        let globalStartDate = '';
+        let globalStartTime = '23:00';
+        let globalEndDate = '';
+        let globalEndTime = '23:00';
+        let globalHide23 = true; // Default: hide 23:00 on intervals
+
+        // Initialize with current date and time (23:00 default)
+        function initDateTimes() {
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            const timeString = '23:00';
+            
+            globalStartDate = dateString;
+            globalStartTime = timeString;
+            globalEndDate = dateString;
+            globalEndTime = timeString;
+            
+            updateAllDisplays();
+            updateAllInputs();
+        }
+
+        // Format date for display
+        function formatDate(date) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Update all date displays across all slides
+        function updateAllDisplays() {
+            const startDate = new Date(globalStartDate + 'T00:00:00');
+            const endDate = new Date(globalEndDate + 'T00:00:00');
+            const formattedStartDate = formatDate(startDate);
+            const formattedEndDate = formatDate(endDate);
+            
+            // Check if it's an interval (different dates or times)
+            const isInterval = globalStartDate !== globalEndDate || globalStartTime !== globalEndTime;
+            
+            document.querySelectorAll('.date-display').forEach(display => {
+                const dateText = display.querySelector('.date-text');
+                const timeText = display.querySelector('.time-text');
+                
+                if (isInterval) {
+                    // Show interval
+                    if (globalStartDate !== globalEndDate) {
+                        // Different dates - show date range
+                        dateText.textContent = formattedStartDate + ' → ' + formattedEndDate;
+                        
+                        // Show or hide times based on hide23 checkbox
+                        if (globalHide23) {
+                            timeText.textContent = ''; // Hide times when hide23 is enabled
+                        } else {
+                            timeText.textContent = globalStartTime + ' → ' + globalEndTime; // Show time range
+                        }
+                    } else {
+                        // Same date, different times - show date and time range
+                        dateText.textContent = formattedStartDate;
+                        timeText.textContent = globalStartTime + ' → ' + globalEndTime;
+                    }
+                } else {
+                    // Single date/time - respect hide23 checkbox
+                    dateText.textContent = formattedStartDate;
+                    if (globalHide23) {
+                        timeText.textContent = ''; // Hide time by default
+                    } else {
+                        timeText.textContent = globalStartTime; // Show time only when checkbox is unchecked
+                    }
+                }
+            });
+        }
+
+        // Update all input fields across all slides
+        function updateAllInputs() {
+            document.querySelectorAll('.start-date').forEach(input => {
+                input.value = globalStartDate;
+            });
+            document.querySelectorAll('.start-time').forEach(input => {
+                input.value = globalStartTime;
+            });
+            document.querySelectorAll('.end-date').forEach(input => {
+                input.value = globalEndDate;
+            });
+            document.querySelectorAll('.end-time').forEach(input => {
+                input.value = globalEndTime;
+            });
+        }
+
+        // Initialize dots
+        function initDots() {
+            const dotsContainer = document.getElementById('dots-container');
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                if (i === 0) dot.classList.add('active');
+                dot.onclick = () => goToSlide(i);
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        // Setup date picker event listeners
+        function setupDatePickers() {
+            document.querySelectorAll('.date-overlay').forEach(overlay => {
+                const display = overlay.querySelector('.date-display');
+                const picker = overlay.querySelector('.date-picker');
+                const startDateInput = overlay.querySelector('.start-date');
+                const startTimeInput = overlay.querySelector('.start-time');
+                const endDateInput = overlay.querySelector('.end-date');
+                const endTimeInput = overlay.querySelector('.end-time');
+                const hide23Checkbox = overlay.querySelector('.hide-23-checkbox');
+
+                // Toggle date picker on click/tap
+                display.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Close all other pickers
+                    document.querySelectorAll('.date-picker').forEach(p => {
+                        if (p !== picker) p.classList.remove('active');
+                    });
+                    picker.classList.toggle('active');
+                });
+
+                // Update global state when any date/time changes
+                const updateGlobalDateTime = () => {
+                    globalStartDate = startDateInput.value;
+                    globalStartTime = startTimeInput.value;
+                    globalEndDate = endDateInput.value;
+                    globalEndTime = endTimeInput.value;
+                    
+                    // Update all displays and inputs across all slides
+                    updateAllDisplays();
+                    updateAllInputs();
+                    
+                    // Close the picker
+                    picker.classList.remove('active');
+                };
+
+                startDateInput.addEventListener('change', updateGlobalDateTime);
+                startTimeInput.addEventListener('change', updateGlobalDateTime);
+                endDateInput.addEventListener('change', updateGlobalDateTime);
+                endTimeInput.addEventListener('change', updateGlobalDateTime);
+
+                // Handle hide 23:00 checkbox
+                hide23Checkbox.addEventListener('change', (e) => {
+                    globalHide23 = e.target.checked;
+                    
+                    // Update all checkboxes to match
+                    document.querySelectorAll('.hide-23-checkbox').forEach(cb => {
+                        cb.checked = globalHide23;
+                    });
+                    
+                    // Update display
+                    updateAllDisplays();
+                });
+
+                // Prevent picker from closing when clicking inside it
+                picker.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            });
+        }
+
+        // Close date picker when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.date-overlay')) {
+                document.querySelectorAll('.date-picker').forEach(picker => {
+                    picker.classList.remove('active');
+                });
+            }
+        });
+
+        function showSlide(n) {
+            // Wrap around if needed
+            if (n >= totalSlides) currentSlide = 0;
+            if (n < 0) currentSlide = totalSlides - 1;
+            else currentSlide = n;
+
+            // Hide all slides
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            // Show current slide
+            slides[currentSlide].classList.add('active');
+
+            // Update dots
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach(dot => dot.classList.remove('active'));
+            if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+
+            // Update all counters
+            document.querySelectorAll('.current-slide').forEach(counter => {
+                counter.textContent = currentSlide + 1;
+            });
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        function goToSlide(n) {
+            showSlide(n);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Initialize everything
+        document.querySelectorAll('.total-slides').forEach(counter => {
+            counter.textContent = totalSlides;
+        });
+        
+        initDots();
+        initDateTimes();
+        setupDatePickers();
+        showSlide(0);
+  
+        
+        // Saved Companies Management
+        let savedCompanies = [];
+
+        // Load saved companies from localStorage on page load
+        function loadSavedCompanies() {
+            const saved = localStorage.getItem('savedCompanies');
+            if (saved) {
+                savedCompanies = JSON.parse(saved);
+                updateSavedList();
+                updateSaveButtons();
+            }
+        }
+
+        // Save company
+        function saveCompany(button) {
+            const slide = button.closest('.slide');
+            const ticker = slide.getAttribute('data-ticker');
+            const company = slide.getAttribute('data-company');
+            
+            if (!ticker || !company) return;
+            
+            // Check if already saved
+            const exists = savedCompanies.find(c => c.ticker === ticker);
+            
+            if (exists) {
+                // Remove from saved
+                savedCompanies = savedCompanies.filter(c => c.ticker !== ticker);
+                button.textContent = '💾 Save';
+                button.classList.remove('saved');
+            } else {
+                // Add to saved
+                const link = `https://stockanalysis.com/stocks/${ticker.toLowerCase()}/`;
+                savedCompanies.push({ ticker, company, link });
+                button.textContent = '✓ Saved';
+                button.classList.add('saved');
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('savedCompanies', JSON.stringify(savedCompanies));
+            updateSavedList();
+        }
+
+        // Update the saved list display
+        function updateSavedList() {
+            const content = document.getElementById('savedListContent');
+            const badge = document.getElementById('savedCount');
+            
+            if (savedCompanies.length === 0) {
+                content.innerHTML = '<p class="empty-list-message">No companies saved yet</p>';
+                badge.style.display = 'none';
+            } else {
+                badge.textContent = savedCompanies.length;
+                badge.style.display = 'flex';
+                
+                content.innerHTML = savedCompanies.map((company, index) => `
+                    <div class="saved-item">
+                        <div class="saved-item-info">
+                            <span class="saved-item-ticker">${company.ticker}</span>
+                            <a href="${company.link}" target="_blank" class="saved-item-link">${company.link}</a>
+                        </div>
+                        <button class="remove-item-btn" onclick="removeCompany('${company.ticker}')">Remove</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Update save buttons state
+        function updateSaveButtons() {
+            document.querySelectorAll('.save-btn').forEach(btn => {
+                const slide = btn.closest('.slide');
+                const ticker = slide.getAttribute('data-ticker');
+                
+                if (savedCompanies.find(c => c.ticker === ticker)) {
+                    btn.textContent = '✓ Saved';
+                    btn.classList.add('saved');
+                } else {
+                    btn.textContent = '💾 Save';
+                    btn.classList.remove('saved');
+                }
+            });
+        }
+
+        // Remove a company from saved list
+        function removeCompany(ticker) {
+            savedCompanies = savedCompanies.filter(c => c.ticker !== ticker);
+            localStorage.setItem('savedCompanies', JSON.stringify(savedCompanies));
+            updateSavedList();
+            updateSaveButtons();
+        }
+
+        // Toggle saved list visibility
+        function toggleSavedList() {
+            const container = document.getElementById('savedListContainer');
+            container.classList.toggle('visible');
+        }
+
+        // Copy all companies to clipboard
+        function copyAllCompanies() {
+            if (savedCompanies.length === 0) {
+                alert('No companies to copy!');
+                return;
+            }
+            
+            const textToCopy = savedCompanies.map(c => `${c.ticker}\t${c.link}`).join('\n');
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = document.querySelector('.copy-all-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const btn = document.querySelector('.copy-all-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        // Clear all saved companies
+        function clearAllCompanies() {
+            if (savedCompanies.length === 0) return;
+            
+            if (confirm('Are you sure you want to clear all saved companies?')) {
+                savedCompanies = [];
+                localStorage.setItem('savedCompanies', JSON.stringify(savedCompanies));
+                updateSavedList();
+                updateSaveButtons();
+            }
+        }
+
+        // Initialize saved companies on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadSavedCompanies();
+        });
+</script>
+</body>
+</html>
